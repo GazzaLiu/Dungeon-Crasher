@@ -3,35 +3,31 @@ using System.Collections;
 
 public class Stage1_Manager : MonoBehaviour {
 
-    //宣告場地大小
-    const int maxWidth = 5;
-    const int maxHeight = 7;
+    const int maxWidth = 5; //宣告場地寬
+    const int maxHeight = 7; //宣告場地高
 
-    //宣告玩家與敵人位置
-    public int[] player1 = new int[2] { 6, 1 };
-    public int[] player2 = new int[2] { 6, 3 };
-    public int[] enemy1 = new int[2] { 0, 1 };
-    public int[] enemy2 = new int[2] { 6, 3 };
+    public int turn = 0; //宣告回合
 
-    //宣告移動起始位置與結束位置
-    int[] startPosition = new int[2];
-    int[] endPosition = new int[2];
-
-    bool hold = false; //宣告是否抓住玩家
-    int turn = 0; //宣告回合
-
-    //宣告隨機變數
-    int randRow = 0;
-    int randColumn = 0;
+    //宣告選取位置
+    public int[] position = new int[2] { 0, 0 };
 
     //宣告棋盤：1：玩家與敵人位置、2：動作、3：道具、4：地形
-    string[,,] board = new string[maxHeight, maxWidth, 4]; //宣告棋盤
+    public string[,,] board = new string[maxHeight, maxWidth, 4]; //宣告棋盤
 
-    PositionController pc; //宣告得到另一文件
+    public GameObject player1;
+    public GameObject player2;
+    public GameObject enemy1;
+    public GameObject enemy2;
+
+    Player[] p = new Player[2];
+    Enemy[] e = new Enemy[2];
 
     void Start () {
 
-        pc = this.GetComponent<PositionController>(); //得到另一文件當前選取格位置
+        p[0] = player1.GetComponent<Player>();
+        p[1] = player2.GetComponent<Player>();
+        e[0] = enemy1.GetComponent<Enemy>();
+        e[1] = enemy2.GetComponent<Enemy>();
 
         //初始化棋盤
         for (int k = 0; k < 4; k++) {
@@ -43,91 +39,69 @@ public class Stage1_Manager : MonoBehaviour {
         }
 
         //初始化玩家與敵人位置
-        board[player1[0], player1[1], 1] = "p1";
-        board[player2[0], player2[1], 1] = "p2";
-        board[enemy1[0], enemy1[1], 1] = "e1";
-        board[enemy2[0], enemy2[1], 1] = "e2";
+        board[p[0].position[0], p[0].position[1], 1] = "p" + p[0].p_tag.ToString();
+        board[p[1].position[0], p[1].position[1], 1] = "p" + p[1].p_tag.ToString();
+        board[e[0].position[0], e[0].position[1], 1] = "e" + e[0].e_tag.ToString();
+        board[e[1].position[0], e[1].position[1], 1] = "e" + e[1].e_tag.ToString();
 
-        //顯示棋盤
-        Display(board);
+        print(position[0].ToString() + position[1].ToString()); //顯示位置
     }
 
 	void Update () {
 
-        //Player1的回合
-        if ((turn % 4 == 0) && (Input.GetKeyDown(KeyCode.Space))) { //按下空白鍵來操作玩家
-            if(hold == false && board[pc.position[0], pc.position[1], 1] == "p1") { //若格子有玩家則將其抓起
-                startPosition[0] = pc.position[0]; //記下玩家初始位置
-                startPosition[1] = pc.position[1];
-                hold = true; //抓起
-                Display(board);
-            }
-            if (hold == true && board[pc.position[0], pc.position[1], 1] == "n") { //若格子上無人則將其放下
-                endPosition[0] = pc.position[0]; //記下玩家結束位置
-                endPosition[1] = pc.position[1];
-                board[startPosition[0], startPosition[1], 1] = "n"; //將原始位置改為n
-                board[pc.position[0], pc.position[1], 1] = "p1"; //移動玩家
-                hold = false; //放下
-                Display(board);
-                turn++;
-            }
+        if (Input.GetKeyDown(KeyCode.RightArrow)) { //按下方向鍵右
+            position[1]++;
+            print(position[0].ToString() + position[1].ToString());
         }
-
-        //Player2的回合
-        if ((turn % 4 == 1) && (Input.GetKeyDown(KeyCode.Space))) { //按下空白鍵來操作玩家
-            if (hold == false && board[pc.position[0], pc.position[1], 1] == "p2") { //若格子有玩家則將其抓起
-                startPosition[0] = pc.position[0]; //記下玩家初始位置
-                startPosition[1] = pc.position[1];
-                hold = true; //抓起
-                Display(board);
-            }
-            if (hold == true && board[pc.position[0], pc.position[1], 1] == "n") { //若格子上無人則將其放下
-                endPosition[0] = pc.position[0]; //記下玩家結束位置
-                endPosition[1] = pc.position[1];
-                board[startPosition[0], startPosition[1], 1] = "n"; //將原始位置改為n
-                board[pc.position[0], pc.position[1], 1] = "p2"; //移動玩家
-                hold = false; //放下
-                Display(board);
-                turn++;
-            }
+        if (Input.GetKeyDown(KeyCode.LeftArrow)) { //按下方向鍵左
+            position[1]--;
+            print(position[0].ToString() + position[1].ToString());
         }
-
-        //Enemy1的回合
-        if (turn % 4 == 2) {
-            do {
-                randRow = Random.Range(0, maxHeight); //隨機指定一列
-                randColumn = Random.Range(0, maxWidth); //隨機指定一欄
-            } while (board[randRow, randColumn, 1] != "n");
-            board[enemy1[0], enemy1[1], 1] = "n"; //將原始位置改為n
-            enemy1[0] = randRow;
-            enemy1[1] = randColumn;
-            board[enemy1[0], enemy1[1], 1] = "e1"; //移動敵人
-            Display(board);
-            turn++;
+        if (Input.GetKeyDown(KeyCode.UpArrow)) { //按下方向鍵上
+            position[0]--;
+            print(position[0].ToString() + position[1].ToString());
         }
-
-        //Enemy2的回合
-        if (turn % 4 == 3) {
-            do {
-                randRow = Random.Range(0, maxHeight); //隨機指定一列
-                randColumn = Random.Range(0, maxWidth); //隨機指定一欄
-            } while (board[randRow, randColumn, 1] != "n");
-            board[enemy2[0], enemy2[1], 1] = "n"; //將原始位置改為n
-            enemy2[0] = randRow;
-            enemy2[1] = randColumn;
-            board[enemy2[0], enemy2[1], 1] = "e2"; //移動敵人
-            Display(board);
-            turn++;
+        if (Input.GetKeyDown(KeyCode.DownArrow)) { //按下方向鍵下
+            position[0]++;
+            print(position[0].ToString() + position[1].ToString());
+        }
+        if (Input.GetKeyDown(KeyCode.D)) { //顯示棋盤
+            Display(board, 1);
+        }
+        if (Input.GetKeyDown(KeyCode.F)) { //顯示棋盤
+            Display(board, 2);
         }
 
     }
 
+    public void CheckAggr () { //很冗
+        for (int i = 0; i < maxHeight; i++) {
+            for (int j = 0; j < maxWidth; j++) {
+                if(board[i, j, 2].IndexOf("attack") >= 0) {
+                    if(board[i, j, 1] == "p1") {
+                        if (board[i - 1, j, 1] == "e1")
+                            e[0].HP -= p[0].ATK;
+                        else
+                            e[1].HP -= p[0].ATK;
+                    }
+                    else {
+                        if (board[i - 1, j, 1] == "e1")
+                            e[0].HP -= p[1].ATK;
+                        else
+                            e[1].HP -= p[1].ATK;
+                    }
+                    board[i, j, 2] = "n";
+                }
+            }
+        }
+    }
+
     //顯示棋盤
-    static void Display (string[,,] board) {
+    static void Display (string[,,] board, int floor) {
         string display = "";
         for (int i = 0; i < maxHeight; i++) {
             for (int j = 0; j < maxWidth; j++) {
-                display += board[i, j, 1] + " ";
+                display += board[i, j, floor] + " ";
             }
             display += "\n";
         }

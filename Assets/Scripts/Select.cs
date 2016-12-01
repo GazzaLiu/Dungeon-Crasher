@@ -11,8 +11,17 @@ public class Select : MonoBehaviour {
     }
 
     void Update () {
-        if(Input.GetKeyDown(KeyCode.RightArrow)|| Input.GetKeyDown(KeyCode.LeftArrow)|| Input.GetKeyDown(KeyCode.UpArrow)|| Input.GetKeyDown(KeyCode.DownArrow)) {
-            //this.transform.position = new Vector3(0) m.position[0] m.position[1] 座標系轉換
-        }
+        //this.transform.position = new Vector3(Horizontalposition(m.position[1]), Verticallposition(m.position[0]), 0);
     }
+
+    static float Horizontalposition (int i) {
+        float x = -106.5f / 30f + (2f * i + 1f) * (203f / 480f);
+        return x;
+    }
+
+    static float Verticallposition (int j) {
+        float y = -58f / 30f - (2f * j + 1f) * (116f / 300f);
+        return y;
+    }
+
 }

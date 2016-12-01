@@ -4,7 +4,7 @@ using System.Collections;
 public class Stage1_Manager : MonoBehaviour {
 
     const int maxWidth = 5; //宣告場地寬
-    const int maxHeight = 7; //宣告場地高
+    const int maxHeight = 8; //宣告場地高
 
     public int turn = 0; //宣告回合
 
@@ -77,18 +77,30 @@ public class Stage1_Manager : MonoBehaviour {
     public void CheckAggr () { //很冗
         for (int i = 0; i < maxHeight; i++) {
             for (int j = 0; j < maxWidth; j++) {
-                if(board[i, j, 2].IndexOf("attack") >= 0) {
-                    if(board[i, j, 1] == "p1") {
+                if (board[i, j, 2].IndexOf("attack") >= 0) {
+                    if (board[i, j, 1] == "p1") {
                         if (board[i - 1, j, 1] == "e1")
                             e[0].HP -= p[0].ATK;
-                        else
+                        else if (board[i - 1, j, 1] == "e2")
                             e[1].HP -= p[0].ATK;
                     }
-                    else {
+                    else if (board[i, j, 1] == "p2") {
                         if (board[i - 1, j, 1] == "e1")
                             e[0].HP -= p[1].ATK;
-                        else
+                        else if (board[i - 1, j, 1] == "e2")
                             e[1].HP -= p[1].ATK;
+                    }
+                    else if (board[i, j, 1] == "e1") {
+                        if (board[i - 1, j, 1] == "p1")
+                            p[0].HP -= e[0].ATK;
+                        else if (board[i - 1, j, 1] == "p2")
+                            p[1].HP -= e[0].ATK;
+                    }
+                    else if (board[i, j, 1] == "e2") {
+                        if (board[i - 1, j, 1] == "p1")
+                            p[0].HP -= e[1].ATK;
+                        else if (board[i - 1, j, 1] == "p2")
+                            p[1].HP -= e[1].ATK;
                     }
                     board[i, j, 2] = "n";
                 }

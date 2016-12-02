@@ -7,6 +7,7 @@ public class Player : MonoBehaviour {
     public int step = 1;
     public int HP = 0;
     public int ATK = 0;
+    public int range = 2;
 
     public int[] position = new int[2] { 0, 0 };
 
@@ -25,8 +26,13 @@ public class Player : MonoBehaviour {
 
     void Update () {
 
-        if (HP <= 0)
+        this.transform.position = new Vector3(Horizontalposition(position[1]), Verticallposition(position[0]), 0);
+
+        if (HP <= 0) {
+            m.board[position[0], position[1], 1] = "n";
+            m.board[position[0], position[1], 3] = "dead";
             Destroy(this.gameObject);
+        }
 
         //Player的回合
         if (m.turn % 4 == (p_tag - 1)) {
@@ -36,7 +42,7 @@ public class Player : MonoBehaviour {
                     startPosition[1] = m.position[1];
                     hold = true; //抓起
                 }
-                if (hold == true && m.board[m.position[0], m.position[1], 1] == "n" && Mathf.Abs(m.position[0] - startPosition[0]) - Mathf.Abs(m.position[1] - startPosition[1]) <= 10) { //若格子上無人則將其放下
+                if (hold == true && m.board[m.position[0], m.position[1], 1] == "n" && Mathf.Abs(m.position[0] - startPosition[0]) - Mathf.Abs(m.position[1] - startPosition[1]) <= range) { //若格子上無人則將其放下
                     endPosition[0] = m.position[0]; //記下玩家結束位置
                     endPosition[1] = m.position[1];
                     hold = false; //放下
@@ -57,4 +63,15 @@ public class Player : MonoBehaviour {
         }
 
     }
+
+    static float Horizontalposition (int i) {
+        float x = -58f / 30f + (2f * i) * (203f / 420f);
+        return x;
+    }
+
+    static float Verticallposition (int j) {
+        float y = 106.5f / 30f - (2f * j) * (116f / 240f);
+        return y;
+    }
+
 }

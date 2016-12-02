@@ -11,16 +11,16 @@ public class Select : MonoBehaviour {
     }
 
     void Update () {
-        //this.transform.position = new Vector3(Horizontalposition(m.position[1]), Verticallposition(m.position[0]), 0);
+        this.transform.position = new Vector3(Horizontalposition(m.position[1]), Verticallposition(m.position[0]), 0);
     }
 
     static float Horizontalposition (int i) {
-        float x = -106.5f / 30f + (2f * i + 1f) * (203f / 480f);
+        float x = -58f / 30f + (2f * i) * (203f / 420f);
         return x;
     }
 
     static float Verticallposition (int j) {
-        float y = -58f / 30f - (2f * j + 1f) * (116f / 300f);
+        float y = 106.5f / 30f - (2f * j) * (116f / 240f);
         return y;
     }
 

@@ -5,14 +5,14 @@ public class Stage1_Manager : Entity {
 
     const int maxWidth = 5; //宣告場地寬
     const int maxHeight = 8; //宣告場地高
-    const int layer = 2; //宣告場地層
+    const int layer = 3; //宣告場地層
 
     public int turn = 0; //宣告回合
 
     //宣告選取位置
     public int[] position = new int[2] { 0, 0 };
 
-    //宣告棋盤：1：玩家與敵人位置、2：動作
+    //宣告棋盤：1：玩家與敵人位置、2：A卡、3：P卡
     public string[,,] board = new string[maxHeight, maxWidth, layer]; //宣告棋盤
 
     public GameObject[] character = new GameObject[4];
@@ -68,6 +68,23 @@ public class Stage1_Manager : Entity {
             Display(board, 1);
         }
 
+        ActivatePlayer();
+
+    }
+
+    public void ActivatePlayer () {
+        foreach (Player player in p) {
+            if (turn % 4 == player.turnNumber) {
+                player.isTurn = true;
+            }
+            else {
+                player.isTurn = false;
+            }
+        }
+    }
+
+    public void EndTurn () {
+        turn++;
     }
 
     public void CheckAggr () {
@@ -76,12 +93,19 @@ public class Stage1_Manager : Entity {
             for (int j = 0; j < maxWidth; j++) {
                 if (board[i, j, 1].IndexOf("attack") >= 0 && board[i, j, 1].IndexOf("up") >= 0) {
                     if (board[i, j, 0].IndexOf("p") >= 0 && board[i - 1, j, 0].IndexOf("e") >= 0) {
-                        e[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP -= p[int.Parse(board[i, j, 0][1] + "") - 1].ATK;
+                        if (board[i, j, 2].IndexOf("defense") >= 0)
+                            e[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP -= (p[int.Parse(board[i, j, 0][1] + "") - 1].ATK - e[int.Parse(board[i, j, 0][1] + "") - 1].DEF);
+                        else
+                            e[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP -= p[int.Parse(board[i, j, 0][1] + "") - 1].ATK;
                     }
                     else if (board[i, j, 0].IndexOf("e") >= 0 && board[i - 1, j, 0].IndexOf("p") >= 0) {
-                        p[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP -= e[int.Parse(board[i, j, 0][1] + "") - 1].ATK;
+                        if (board[i, j, 2].IndexOf("defense") >= 0)
+                            p[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP -= (e[int.Parse(board[i, j, 0][1] + "") - 1].ATK - p[int.Parse(board[i, j, 0][1] + "") - 1].DEF);
+                        else
+                            p[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP -= e[int.Parse(board[i, j, 0][1] + "") - 1].ATK;
                     }
                     board[i, j, 1] = "n";
+                    board[i, j, 2] = "n";
                 }
                 else if (board[i, j, 1].IndexOf("attack") >= 0 && board[i, j, 1].IndexOf("down") >= 0) {
                     if (board[i, j, 0].IndexOf("p") >= 0 && board[i + 1, j, 0].IndexOf("e") >= 0) {

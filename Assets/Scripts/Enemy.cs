@@ -6,6 +6,7 @@ public class Enemy : Entity {
     public int e_tag = 0;
     public int HP = 0;
     public int ATK = 0;
+    public int DEF = 0;
     public int range = 2;
 
     public int[] position = new int[2] { 0, 0 };

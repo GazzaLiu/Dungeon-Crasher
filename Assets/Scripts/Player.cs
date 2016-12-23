@@ -16,6 +16,7 @@ public class Player : Entity {
 
     public GameObject manager;
     public Stage1_Manager m;
+    public Card[] hand = new Card[3];
 
     private bool hold = false;
     private int step = 1;
@@ -33,6 +34,15 @@ public class Player : Entity {
         sr = this.transform.GetChild(0).GetComponent<SpriteRenderer>();
         Deck deck = new Deck(card_id);
         deck.ShowDeck();
+        //deck.Shuffle();
+        //print("-----");
+        //deck.ShowDeck();
+        hand[0] = deck.Draw();
+        hand[1] = deck.Draw();
+        hand[2] = deck.Draw();
+        print("hand1:" + hand[0].ID);
+        print("hand2:" + hand[1].ID);
+        print("hand3:" + hand[2].ID);
     }
 
     void Update () {

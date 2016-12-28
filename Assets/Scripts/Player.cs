@@ -33,16 +33,10 @@ public class Player : Entity {
         ac = this.transform.GetChild(0).GetComponent<AnimationController>();
         sr = this.transform.GetChild(0).GetComponent<SpriteRenderer>();
         Deck deck = new Deck(card_id);
-        deck.ShowDeck();
-        //deck.Shuffle();
-        //print("-----");
-        //deck.ShowDeck();
+        Deck fold = new Deck();
         hand[0] = deck.Draw();
         hand[1] = deck.Draw();
         hand[2] = deck.Draw();
-        print("hand1:" + hand[0].ID);
-        print("hand2:" + hand[1].ID);
-        print("hand3:" + hand[2].ID);
     }
 
     void Update () {
@@ -77,8 +71,29 @@ public class Player : Entity {
                 }
             }
 
+            if (step == 2 && Input.GetKeyDown(KeyCode.Alpha1) && hand[0].Action == "attack") {
+                m.board[position[0], position[1], 1] = hand[0].Type + ActDirection(position, m.position);
+                m.CheckAggr();
+                //ac.Attack();
+                step++;
+            }
+
+            if (step == 2 && Input.GetKeyDown(KeyCode.Alpha2) && hand[1].Action == "attack") {
+                m.board[position[0], position[1], 1] = hand[1].Type + ActDirection(position, m.position);
+                m.CheckAggr();
+                //ac.Attack();
+                step++;
+            }
+
+            if (step == 2 && Input.GetKeyDown(KeyCode.Alpha3) && hand[0].Action == "attack") {
+                m.board[position[0], position[1], 1] = hand[0].Type + ActDirection(position, m.position);
+                m.CheckAggr();
+                //ac.Attack();
+                step++;
+            }
+
             if (step == 2 && Input.GetKeyDown(KeyCode.Z)) {
-                m.board[position[0], position[1], 1] = ActDirection(position, m.position);
+                m.board[position[0], position[1], 1] = "attack" + ActDirection(position, m.position);
                 m.CheckAggr();
                 //ac.Attack();
                 step++;
@@ -98,15 +113,21 @@ public class Player : Entity {
 
     static string ActDirection (int[] position, int[] selectPosition) {
         if (selectPosition[0] - position[0] == -1 && selectPosition[1] - position[1] == 0)
-            return "attack_up";
+            return "_up";
         else if (selectPosition[0] - position[0] == 1 && selectPosition[1] - position[1] == 0)
-            return "attack_down";
+            return "_down";
         else if (selectPosition[0] - position[0] == 0 && selectPosition[1] - position[1] == 1)
-            return "attack_right";
+            return "_right";
         else if (selectPosition[0] - position[0] == 0 && selectPosition[1] - position[1] == -1)
-            return "attack_left";
+            return "_left";
         else
             return "n";
+    }
+
+    private void ResetDeck (ref Deck deck, ref Deck fold) {
+        deck = new Deck(fold);
+        deck.Shuffle();
+        fold.Clear();
     }
 
 }

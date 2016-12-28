@@ -13,7 +13,7 @@ public class Stage1_Manager : Entity {
     public int[] position = new int[2] { 0, 0 };
 
     //宣告棋盤：1：玩家與敵人位置、2：A卡、3：P卡
-    public string[,,] board = new string[maxHeight, maxWidth, layer]; //宣告棋盤
+    public string[,,] board = new string[maxHeight, maxWidth, layer];
 
     public GameObject[] character = new GameObject[4];
 

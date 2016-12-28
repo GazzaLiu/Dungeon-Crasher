@@ -41,14 +41,14 @@ public class Enemy : Entity {
 
         if (m.turn % 4 == (e_tag + 1)) {
             do {
-                randRow = Random.Range(1, 6); //隨機指定一列
-                randColumn = Random.Range(1, 4); //隨機指定一欄
+                randRow = Random.Range(0, 8); //隨機指定一列
+                randColumn = Random.Range(0, 5); //隨機指定一欄
             } while (m.board[randRow, randColumn, 0] != "n");
             m.board[position[0], position[1], 0] = "n"; //將原始位置改為n
             position[0] = randRow;
             position[1] = randColumn;
             m.board[position[0], position[1], 0] = "e" + e_tag.ToString(); //移動敵人
-            m.board[position[0], position[1], 1] = "attack_up";
+            //m.board[position[0], position[1], 1] = "attack_up";
             m.CheckAggr();
             m.turn++;
         }

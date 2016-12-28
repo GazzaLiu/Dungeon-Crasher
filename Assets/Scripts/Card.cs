@@ -21,18 +21,38 @@ public class Card : Entity {
         if (id / 100 == 1) {
             action = "attack";
         }
-        else {
+        else if (id / 100 == 2) {
             action = "defence";
+        }
+        else {
+            action = "";
         }
 
         if ((id % 100 - id % 10) / 10 == 1) {
             type = "smash";
         }
-        else {
+        else if ((id % 100 - id % 10) / 10 == 2) {
             type = "slice";
+        }
+        else {
+            type = "";
         }
 
         value = id % 10;
+    }
+
+    public Card (Card card) {
+        id = card.id;
+        value = card.value;
+        action = card.action;
+        type = card.type;
+    }
+
+    public void Clear () {
+        id = 0;
+        value = 0;
+        action = "";
+        type = "";
     }
 
     public int ID {

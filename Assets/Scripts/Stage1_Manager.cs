@@ -5,15 +5,15 @@ public class Stage1_Manager : Entity {
 
     const int maxWidth = 5; //宣告場地寬
     const int maxHeight = 8; //宣告場地高
-    const int layer = 3; //宣告場地層
+    const int boardLayer = 2;
+    const int cardBoardLayer = 2;
 
     public int turn = 0; //宣告回合
 
-    //宣告選取位置
-    public int[] position = new int[2] { 0, 0 };
+    public int[] position = new int[2] { 0, 0 }; //宣告選取位置
 
-    //宣告棋盤：1：玩家與敵人位置、2：A卡、3：P卡
-    public string[,,] board = new string[maxHeight, maxWidth, layer];
+    public string[,,] board = new string[maxHeight, maxWidth, boardLayer];
+    public Card[,,] cardBoard = new Card[maxHeight, maxWidth, cardBoardLayer];
 
     public GameObject[] character = new GameObject[4];
 
@@ -28,10 +28,13 @@ public class Stage1_Manager : Entity {
         e[1] = character[3].GetComponent<Enemy>();
 
         //初始化棋盤
-        for (int k = 0; k < layer; k++) {
-            for (int i = 0; i < maxHeight; i++) {
-                for (int j = 0; j < maxWidth; j++) {
-                        board[i, j, k] = "n";
+        for (int i = 0; i < maxHeight; i++) {
+            for (int j = 0; j < maxWidth; j++) {
+                for (int k = 0; k < boardLayer; k++) {
+                    board[i, j, k] = "n";
+                }
+                for (int k = 0; k < cardBoardLayer; k++) {
+                    cardBoard[i, j, k] = new Card(); 
                 }
             }
         }
@@ -64,8 +67,8 @@ public class Stage1_Manager : Entity {
         }
         if (Input.GetKeyDown(KeyCode.D)) { //顯示棋盤與位置
             print(position[0].ToString() + position[1].ToString());
-            Display(board, 0);
-            Display(board, 1);
+            DisplayBoard(board, 0);
+            DisplayCardBoard(cardBoard, 1);
         }
 
         ActivatePlayer();
@@ -87,53 +90,65 @@ public class Stage1_Manager : Entity {
         turn++;
     }
 
+    public int ComputeHP (int HP_2, Card aggr, Card pass) {
+        if (aggr.Type == pass.Type)
+            return HP_2 - Mathf.Max((aggr.Value - pass.Value), 0);
+        else
+            return HP_2 - aggr.Value;
+    }
+
     public void CheckAggr () {
-        Display(board, 1);
+
+        DisplayBoard(board, 1);
+        DisplayCardBoard(cardBoard, 0);
+
         for (int i = 0; i < maxHeight; i++) {
             for (int j = 0; j < maxWidth; j++) {
-                if (board[i, j, 1].IndexOf("attack") >= 0 && board[i, j, 1].IndexOf("up") >= 0) {
+
+                if (board[i, j, 1] == "up") {
                     if (board[i, j, 0].IndexOf("p") >= 0 && board[i - 1, j, 0].IndexOf("e") >= 0) {
-                        if (board[i, j, 2].IndexOf("defense") >= 0)
-                            e[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP -= (p[int.Parse(board[i, j, 0][1] + "") - 1].ATK - e[int.Parse(board[i, j, 0][1] + "") - 1].DEF);
-                        else
-                            e[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP -= p[int.Parse(board[i, j, 0][1] + "") - 1].ATK;
+                        e[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP = ComputeHP(e[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP, cardBoard[i, j, 0], cardBoard[i - 1, j, 1]);
                     }
                     else if (board[i, j, 0].IndexOf("e") >= 0 && board[i - 1, j, 0].IndexOf("p") >= 0) {
-                        if (board[i, j, 2].IndexOf("defense") >= 0)
-                            p[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP -= (e[int.Parse(board[i, j, 0][1] + "") - 1].ATK - p[int.Parse(board[i, j, 0][1] + "") - 1].DEF);
-                        else
-                            p[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP -= e[int.Parse(board[i, j, 0][1] + "") - 1].ATK;
+                        p[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP = ComputeHP(p[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP, cardBoard[i, j, 0], cardBoard[i - 1, j, 1]);
                     }
                     board[i, j, 1] = "n";
-                    board[i, j, 2] = "n";
+                    cardBoard[i, j, 0].Clear();
                 }
-                else if (board[i, j, 1].IndexOf("attack") >= 0 && board[i, j, 1].IndexOf("down") >= 0) {
+
+                else if (board[i, j, 1] == "down") {
                     if (board[i, j, 0].IndexOf("p") >= 0 && board[i + 1, j, 0].IndexOf("e") >= 0) {
-                        e[int.Parse(board[i + 1, j, 0][1] + "") - 1].HP -= p[int.Parse(board[i, j, 0][1] + "") - 1].ATK;
+                        e[int.Parse(board[i + 1, j, 0][1] + "") - 1].HP = ComputeHP(e[int.Parse(board[i + 1, j, 0][1] + "") - 1].HP, cardBoard[i, j, 0], cardBoard[i + 1, j, 1]);
                     }
                     else if (board[i, j, 0].IndexOf("e") >= 0 && board[i + 1, j, 0].IndexOf("p") >= 0) {
-                        p[int.Parse(board[i + 1, j, 0][1] + "") - 1].HP -= e[int.Parse(board[i, j, 0][1] + "") - 1].ATK;
+                        p[int.Parse(board[i + 1, j, 0][1] + "") - 1].HP = ComputeHP(p[int.Parse(board[i + 1, j, 0][1] + "") - 1].HP, cardBoard[i, j, 0], cardBoard[i + 1, j, 1]);
                     }
                     board[i, j, 1] = "n";
+                    cardBoard[i, j, 0].Clear();
                 }
-                else if (board[i, j, 1].IndexOf("attack") >= 0 && board[i, j, 1].IndexOf("left") >= 0) {
+
+                else if (board[i, j, 1] == "left") {
                     if (board[i, j, 0].IndexOf("p") >= 0 && board[i, j - 1, 0].IndexOf("e") >= 0) {
-                        e[int.Parse(board[i, j - 1, 0][1] + "") - 1].HP -= p[int.Parse(board[i, j, 0][1] + "") - 1].ATK;
+                        e[int.Parse(board[i, j - 1, 0][1] + "") - 1].HP = ComputeHP(e[int.Parse(board[i, j - 1, 0][1] + "") - 1].HP, cardBoard[i, j, 0], cardBoard[i, j - 1, 1]);
                     }
                     else if (board[i, j, 0].IndexOf("e") >= 0 && board[i, j - 1, 0].IndexOf("p") >= 0) {
-                        p[int.Parse(board[i, j - 1, 0][1] + "") - 1].HP -= e[int.Parse(board[i, j, 0][1] + "") - 1].ATK;
+                        p[int.Parse(board[i, j - 1, 0][1] + "") - 1].HP = ComputeHP(p[int.Parse(board[i, j - 1, 0][1] + "") - 1].HP, cardBoard[i, j, 0], cardBoard[i, j - 1, 1]);
                     }
                     board[i, j, 1] = "n";
+                    cardBoard[i, j, 0].Clear();
                 }
-                else if (board[i, j, 1].IndexOf("attack") >= 0 && board[i, j, 1].IndexOf("right") >= 0) {
+
+                else if (board[i, j, 1] == "right") {
                     if (board[i, j, 0].IndexOf("p") >= 0 && board[i, j + 1, 0].IndexOf("e") >= 0) {
-                        e[int.Parse(board[i, j + 1, 0][1] + "") - 1].HP -= p[int.Parse(board[i, j, 0][1] + "") - 1].ATK;
+                        e[int.Parse(board[i, j + 1, 0][1] + "") - 1].HP = ComputeHP(e[int.Parse(board[i, j + 1, 0][1] + "") - 1].HP, cardBoard[i, j, 0], cardBoard[i, j + 1, 1]);
                     }
                     else if (board[i, j, 0].IndexOf("e") >= 0 && board[i, j + 1, 0].IndexOf("p") >= 0) {
-                        p[int.Parse(board[i, j + 1, 0][1] + "") - 1].HP -= e[int.Parse(board[i, j, 0][1] + "") - 1].ATK;
+                        p[int.Parse(board[i, j + 1, 0][1] + "") - 1].HP = ComputeHP(p[int.Parse(board[i, j + 1, 0][1] + "") - 1].HP, cardBoard[i, j, 0], cardBoard[i, j + 1, 1]);
                     }
                     board[i, j, 1] = "n";
+                    cardBoard[i, j, 0].Clear();
                 }
+
             }
         }
     }

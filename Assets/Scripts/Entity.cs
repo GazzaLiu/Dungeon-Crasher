@@ -3,11 +3,22 @@ using System.Collections;
 
 public class Entity : MonoBehaviour {
 
-    protected void Display (string[,,] board, int floor) {
+    protected void DisplayBoard (string[,,] board, int floor) {
         string display = "";
         for (int i = 0; i <= board.GetUpperBound(0); i++) {
             for (int j = 0; j <= board.GetUpperBound(1); j++) {
                 display += board[i, j, floor] + " ";
+            }
+            display += "\n";
+        }
+        print(display);
+    }
+
+    protected void DisplayCardBoard (Card[,,] board, int floor) {
+        string display = "";
+        for (int i = 0; i <= board.GetUpperBound(0); i++) {
+            for (int j = 0; j <= board.GetUpperBound(1); j++) {
+                display += board[i, j, floor].ID.ToString() + " ";
             }
             display += "\n";
         }

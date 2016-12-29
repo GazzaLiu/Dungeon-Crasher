@@ -50,7 +50,7 @@ public class Enemy : Entity {
             m.board[position[0], position[1], 0] = "e" + e_tag.ToString(); //移動敵人
             //m.board[position[0], position[1], 1] = "attack_up";
             m.CheckAggr();
-            m.turn++;
+            m.EndTurn();
         }
     }
 

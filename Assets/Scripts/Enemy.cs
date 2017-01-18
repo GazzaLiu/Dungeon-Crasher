@@ -63,7 +63,6 @@ public class Enemy : Entity {
             }
 
             //move enemy
-            print("e" + e_tag.ToString());
 
             //attack
             m.CheckAggr();

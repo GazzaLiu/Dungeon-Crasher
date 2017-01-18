@@ -139,10 +139,10 @@ public class Stage1_Displayer : Entity {
 
         //display player's selecion and control position
         if (pointer == 0) {
-            playerSelect.transform.position = new Vector3(0, 0, 0);
+            playerSelect.transform.position = new Vector3(5.15f, -1.28f, 0);
         }
         else if (pointer == 1) {
-            playerSelect.transform.position = new Vector3(0, 0, 0);
+            playerSelect.transform.position = new Vector3(8.251f, -1.28f, 0);
         }
 
     }

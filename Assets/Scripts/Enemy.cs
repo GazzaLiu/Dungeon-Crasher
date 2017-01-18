@@ -65,9 +65,17 @@ public class Enemy : Entity {
             //move enemy
 
             //attack
+            //GetMaxCard(hand, "attack");
+            /*if (GetMaxCard(hand, "attack").ID != 0) {
+                attack here
+            }*/
             m.CheckAggr();
 
             //defence
+            //GetMaxCard(hand, "defence");
+            /*if (GetMaxCard(hand, "defence").ID != 0) {
+                defence here
+            }*/
 
             //end turn
             m.EndTurn("e" + e_tag.ToString());
@@ -83,6 +91,16 @@ public class Enemy : Entity {
             }
         }
         return number;
+    }
+
+    private Card GetMaxCard (Card[] card, string action) {
+        Card tempMaxCard = new Card();
+        for (int i = 0; i < card.Length; i++) {
+            if (card[i].Action == action && card[i].Value >= tempMaxCard.Value) {
+                tempMaxCard = new Card(card[i]);
+            }
+        }
+        return tempMaxCard;
     }
 
 }

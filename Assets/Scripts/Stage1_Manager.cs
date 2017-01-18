@@ -1,45 +1,52 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class Stage1_Manager : Entity {
 
-    const int maxWidth = 5; //宣告場地寬
-    const int maxHeight = 8; //宣告場地高
-    const int boardLayer = 2;
-    const int cardBoardLayer = 2;
+    const int MAX_WIDTH = 5;
+    const int MAX_HEIGHT = 8;
+    const int BOARD_LAYER = 2;
+    const int CARD_BOARD_LAYER = 2;
+    const int MAX_PLAYER = 2;
+    const int MAX_ENEMY = 2;
 
-    public int turn = 0; //宣告回合
+    public int enemyTurn = 0;
 
-    public int[] position = new int[2] { 0, 0 }; //宣告選取位置
+    public int[] position = new int[2] { 0, 0 };
 
-    public string[,,] board = new string[maxHeight, maxWidth, boardLayer];
-    public Card[,,] cardBoard = new Card[maxHeight, maxWidth, cardBoardLayer];
+    public string[,,] board = new string[MAX_HEIGHT, MAX_WIDTH, BOARD_LAYER];
+    public Card[,,] cardBoard = new Card[MAX_HEIGHT, MAX_WIDTH, CARD_BOARD_LAYER];
 
-    public GameObject[] character = new GameObject[4];
+    public GameObject[] character = new GameObject[MAX_PLAYER + MAX_ENEMY];
 
-    Player[] p = new Player[2];
-    Enemy[] e = new Enemy[2];
+    private bool playerTurn = true;
+
+    public string[] liveList = new string[MAX_PLAYER + MAX_ENEMY];
+
+    private Player[] p = new Player[MAX_PLAYER];
+    private Enemy[] e = new Enemy[MAX_ENEMY];
 
     void Start () {
 
-        p[0] = character[0].GetComponent<Player>();
-        p[1] = character[1].GetComponent<Player>();
-        e[0] = character[2].GetComponent<Enemy>();
-        e[1] = character[3].GetComponent<Enemy>();
+        for (int i = 0; i < MAX_PLAYER; i++) {
+            p[i] = character[i].GetComponent<Player>();
+            e[i] = character[i + MAX_PLAYER].GetComponent<Enemy>();
+            liveList[i] = "p" + p[i].p_tag.ToString();
+            liveList[i + MAX_PLAYER] = "e" + e[i].e_tag.ToString();
+        }
 
-        //初始化棋盤
-        for (int i = 0; i < maxHeight; i++) {
-            for (int j = 0; j < maxWidth; j++) {
-                for (int k = 0; k < boardLayer; k++) {
+        for (int i = 0; i < MAX_HEIGHT; i++) {
+            for (int j = 0; j < MAX_WIDTH; j++) {
+                for (int k = 0; k < BOARD_LAYER; k++) {
                     board[i, j, k] = "n";
                 }
-                for (int k = 0; k < cardBoardLayer; k++) {
+                for (int k = 0; k < CARD_BOARD_LAYER; k++) {
                     cardBoard[i, j, k] = new Card(); 
                 }
             }
         }
 
-        //初始化玩家與敵人位置
         board[p[0].position[0], p[0].position[1], 0] = "p" + p[0].p_tag.ToString();
         board[p[1].position[0], p[1].position[1], 0] = "p" + p[1].p_tag.ToString();
         board[e[0].position[0], e[0].position[1], 0] = "e" + e[0].e_tag.ToString();
@@ -49,45 +56,111 @@ public class Stage1_Manager : Entity {
 
 	void Update () {
 
-        if (Input.GetKeyDown(KeyCode.UpArrow)) { //按下方向鍵上
+        if (Input.GetKeyDown(KeyCode.UpArrow)) {
             position[0]--;
-            position[0] = Mathf.Clamp(position[0], 0, maxHeight - 1);
+            position[0] = Mathf.Clamp(position[0], 0, MAX_HEIGHT - 1);
         }
-        if (Input.GetKeyDown(KeyCode.DownArrow)) { //按下方向鍵下
+        if (Input.GetKeyDown(KeyCode.DownArrow)) {
             position[0]++;
-            position[0] = Mathf.Clamp(position[0], 0, maxHeight - 1);
+            position[0] = Mathf.Clamp(position[0], 0, MAX_HEIGHT - 1);
         }
-        if (Input.GetKeyDown(KeyCode.LeftArrow)) { //按下方向鍵左
+        if (Input.GetKeyDown(KeyCode.LeftArrow)) {
             position[1]--;
-            position[1] = Mathf.Clamp(position[1], 0, maxWidth - 1);
+            position[1] = Mathf.Clamp(position[1], 0, MAX_WIDTH - 1);
         }
-        if (Input.GetKeyDown(KeyCode.RightArrow)) { //按下方向鍵右
+        if (Input.GetKeyDown(KeyCode.RightArrow)) {
             position[1]++;
-            position[1] = Mathf.Clamp(position[1], 0, maxWidth - 1);
+            position[1] = Mathf.Clamp(position[1], 0, MAX_WIDTH - 1);
         }
-        if (Input.GetKeyDown(KeyCode.D)) { //顯示棋盤與位置
+        if (Input.GetKeyDown(KeyCode.D)) {
             print(position[0].ToString() + position[1].ToString());
             DisplayBoard(board, 0);
             DisplayCardBoard(cardBoard, 1);
         }
 
-        ActivatePlayer();
+        TurnController();
 
     }
 
-    public void ActivatePlayer () {
+    public void ActivatePlayer (string name) {
         foreach (Player player in p) {
-            if (turn % 4 == player.turnNumber) {
-                player.isTurn = true;
+            if (name == "p" + player.p_tag.ToString()) {
+                player.isActing = true;
             }
             else {
-                player.isTurn = false;
+                player.isActing = false;
             }
         }
     }
 
-    public void EndTurn () {
-        turn++;
+    public void TurnController () {
+        if (playerTurn) {
+            foreach (Player player in p) {
+                player.isTurn = true;
+            }
+            foreach (Enemy enemy in e) {
+                enemy.isTurn = false;
+            }
+        }
+        else {
+            foreach (Player player in p) {
+                player.isTurn = false;
+            }
+            foreach (Enemy enemy in e) {
+                enemy.isTurn = true;
+            }
+        }
+    }
+
+    public void EndTurn (string name) {
+        if (name.IndexOf("p") >= 0) {
+            playerTurn = false;
+            foreach (string str in liveList) {
+                if (str.IndexOf("e") >= 0 && str.IndexOf("dead") >= 0) {
+                    enemyTurn++;
+                }
+            }
+        }
+        else {
+            if (name == liveList[liveList.Length - 1]) {
+                playerTurn = true;
+            }
+            enemyTurn += 2;
+        }
+    }
+
+    public void DeathEvent (int[] position, string name) {
+        int count = 0;
+        for (int i = 0; i < liveList.Length; i++) {
+            if (name == liveList[i]) {
+                liveList[i] = name + "_dead";
+            }
+        }
+        board[position[0], position[1], 0] = "n";
+        foreach (string str in liveList) {
+            if (str.IndexOf("p") >= 0) {
+                if (str.IndexOf("dead") >= 0) {
+                    count++;
+                }
+                else {
+                    count = 0;
+                }
+                if (count >= MAX_PLAYER) {
+                    SceneManager.LoadScene("EnemyWin");
+                }
+            }
+            else {
+                if (str.IndexOf("dead") >= 0) {
+                    count++;
+                }
+                else {
+                    count = 0;
+                }
+                if (count >= MAX_ENEMY) {
+                    SceneManager.LoadScene("PlayerWin");
+                }
+            }
+        }
     }
 
     public int ComputeHP (int HP_2, Card aggr, Card pass) {
@@ -102,8 +175,8 @@ public class Stage1_Manager : Entity {
         DisplayBoard(board, 1);
         DisplayCardBoard(cardBoard, 0);
 
-        for (int i = 0; i < maxHeight; i++) {
-            for (int j = 0; j < maxWidth; j++) {
+        for (int i = 0; i < MAX_HEIGHT; i++) {
+            for (int j = 0; j < MAX_WIDTH; j++) {
 
                 if (board[i, j, 1] == "up") {
                     if (board[i, j, 0].IndexOf("p") >= 0 && board[i - 1, j, 0].IndexOf("e") >= 0) {

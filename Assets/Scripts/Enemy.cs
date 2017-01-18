@@ -3,55 +3,87 @@ using System.Collections;
 
 public class Enemy : Entity {
 
+    public bool isTurn = false;
+    public bool isAttacked = false;
     public int e_tag = 0;
     public int HP = 0;
-    public int ATK = 0;
-    public int DEF = 0;
     public int range = 2;
 
     public int[] position = new int[2] { 0, 0 };
+    public int[] card_id = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     public GameObject manager;
     public Stage1_Manager m;
+    public Card pass = new Card();
 
-    //宣告隨機變數
-    int randRow = 0;
-    int randColumn = 0;
+    public Card[] hand = new Card[3];
 
-    //宣告移動起始位置與結束位置
-    int[] startPosition = new int[2];
-    int[] endPosition = new int[2];
+    private int randRow = 0;
+    private int randColumn = 0;
 
-    SpriteRenderer sr;
+    private int[] startPosition = new int[2];
+    private int[] endPosition = new int[2];
+
+    private SpriteRenderer sr;
+
+    private Deck deck = new Deck();
+    private Deck fold = new Deck();
 
     void Start () {
         m = manager.GetComponent<Stage1_Manager>();
         sr = this.transform.GetChild(0).GetComponent<SpriteRenderer>();
+        pass = new Card();
+        deck = new Deck(card_id);
+        deck.Shuffle();
+        hand[0] = deck.Draw();
+        hand[1] = deck.Draw();
+        hand[2] = deck.Draw();
     }
 
     void Update () {
 
+        //display position
         this.transform.position = new Vector3(Horizontalposition(position[1]), Verticallposition(position[0]), 0);
         sr.sortingOrder = position[0];
 
+        //death event
         if (HP <= 0) {
-            m.board[position[0], position[1], 0] = "n";
+            m.DeathEvent(position, "e" + e_tag.ToString());
             Destroy(this.gameObject);
         }
 
-        if (m.turn % 4 == (e_tag + 1)) {
-            do {
-                randRow = Random.Range(0, 8); //隨機指定一列
-                randColumn = Random.Range(0, 5); //隨機指定一欄
-            } while (m.board[randRow, randColumn, 0] != "n");
-            m.board[position[0], position[1], 0] = "n"; //將原始位置改為n
-            position[0] = randRow;
-            position[1] = randColumn;
-            m.board[position[0], position[1], 0] = "e" + e_tag.ToString(); //移動敵人
-            //m.board[position[0], position[1], 1] = "attack_up";
+        //enemy's turn
+        if (isTurn && m.enemyTurn % 4 == (e_tag * 2 - 2)) {
+
+            //recycle passive card
+            if (m.cardBoard[position[0], position[1], 1].ID != 0) {
+                fold.Add(m.cardBoard[position[0], position[1], 1]);
+                m.cardBoard[position[0], position[1], 1].Clear();
+                pass.Clear();
+            }
+
+            //move enemy
+            print("e" + e_tag.ToString());
+
+            //attack
             m.CheckAggr();
-            m.EndTurn();
+
+            //defence
+
+            //end turn
+            m.EndTurn("e" + e_tag.ToString());
+
         }
+    }
+
+    public int GetHandNumber () {
+        int number = 0;
+        foreach (Card card in hand) {
+            if (card.ID != 0) {
+                number++;
+            }
+        }
+        return number;
     }
 
 }

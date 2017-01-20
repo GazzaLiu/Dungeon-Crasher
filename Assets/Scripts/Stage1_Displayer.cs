@@ -16,6 +16,7 @@ public class Stage1_Displayer : Entity {
     public GameObject[] pass = new GameObject[2];
     public GameObject[] HP = new GameObject[MAX_PLAYER + MAX_ENEMY];
     public GameObject[] range = new GameObject[MAX_PLAYER];
+    public GameObject[] aggr = new GameObject[MAX_ENEMY];
     public Sprite[] cardSprite = new Sprite[11];
     public Sprite[] enemyCardSprite = new Sprite[3];
     public Sprite[] numberSprite = new Sprite[10];
@@ -32,6 +33,7 @@ public class Stage1_Displayer : Entity {
     private SpriteRenderer[] phsr = new SpriteRenderer[MAX_HAND];
     private SpriteRenderer[] ehsr = new SpriteRenderer[MAX_ENEMY];
     private SpriteRenderer[] psr = new SpriteRenderer[MAX_PLAYER + MAX_ENEMY];
+    private SpriteRenderer[] asr = new SpriteRenderer[MAX_ENEMY];
     private SpriteRenderer[] hpsr = new SpriteRenderer[2 * (MAX_PLAYER + MAX_ENEMY)];
 
     void Start () {
@@ -50,6 +52,7 @@ public class Stage1_Displayer : Entity {
             psr[i + MAX_PLAYER] = pass[1].transform.GetChild(i).GetComponent<SpriteRenderer>();
             hpsr[2 * (i + MAX_PLAYER)] = HP[i + MAX_PLAYER].transform.GetChild(0).GetComponent<SpriteRenderer>();
             hpsr[2 * (i + MAX_PLAYER) + 1] = HP[i + MAX_PLAYER].transform.GetChild(1).GetComponent<SpriteRenderer>();
+            asr[i] = aggr[i].GetComponent<SpriteRenderer>();
         }
 
         for (int i = 0; i < MAX_HAND; i++) {
@@ -117,12 +120,24 @@ public class Stage1_Displayer : Entity {
             }
             else {
                 for (int j = 0; j < cardIndex.Length; j++) {
-                    if (e[i].isAttacked && e[i].pass.ID == cardIndex[j]) {
+                    if (e[i].isPass && e[i].pass.ID == cardIndex[j]) {
                         psr[i + MAX_PLAYER].sprite = cardSprite[j];
                         break;
                     }
                     else {
                         psr[i + MAX_PLAYER].sprite = otherSprite[0];
+                    }
+                }
+            }
+            //display enemy's passive card
+            if (e[i].aggr.ID == 0) {
+                asr[i].sprite = cardSprite[cardSprite.Length - 1];
+            }
+            else {
+                for (int j = 0; j < cardIndex.Length; j++) {
+                    if (e[i].aggr.ID == cardIndex[j]) {
+                        asr[i].sprite = cardSprite[j];
+                        break;
                     }
                 }
             }
@@ -155,11 +170,6 @@ public class Stage1_Displayer : Entity {
                 range[i].transform.position = new Vector3(50, 50, 0);
             }
         }
-
-        //HP animation
-        /*foreach (GameObject g in HP) {
-            g.transform.localPosition = new Vector3(0, 0.02f * Mathf.Sin(3 * Time.time), 0);
-        }*/
 
     }
 

@@ -201,6 +201,7 @@ public class Stage1_Manager : Entity {
                 if (board[i, j, 1] == "up") {
                     if (board[i, j, 0].IndexOf("p") >= 0 && board[i - 1, j, 0].IndexOf("e") >= 0) {
                         e[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP = ComputeHP(e[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP, cardBoard[i, j, 0], cardBoard[i - 1, j, 1]);
+                        e[int.Parse(board[i - 1, j, 0][1] + "") - 1].isPass = true;
                     }
                     else if (board[i, j, 0].IndexOf("e") >= 0 && board[i - 1, j, 0].IndexOf("p") >= 0) {
                         p[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP = ComputeHP(p[int.Parse(board[i - 1, j, 0][1] + "") - 1].HP, cardBoard[i, j, 0], cardBoard[i - 1, j, 1]);
@@ -212,6 +213,7 @@ public class Stage1_Manager : Entity {
                 else if (board[i, j, 1] == "down") {
                     if (board[i, j, 0].IndexOf("p") >= 0 && board[i + 1, j, 0].IndexOf("e") >= 0) {
                         e[int.Parse(board[i + 1, j, 0][1] + "") - 1].HP = ComputeHP(e[int.Parse(board[i + 1, j, 0][1] + "") - 1].HP, cardBoard[i, j, 0], cardBoard[i + 1, j, 1]);
+                        e[int.Parse(board[i + 1, j, 0][1] + "") - 1].isPass = true;
                     }
                     else if (board[i, j, 0].IndexOf("e") >= 0 && board[i + 1, j, 0].IndexOf("p") >= 0) {
                         p[int.Parse(board[i + 1, j, 0][1] + "") - 1].HP = ComputeHP(p[int.Parse(board[i + 1, j, 0][1] + "") - 1].HP, cardBoard[i, j, 0], cardBoard[i + 1, j, 1]);
@@ -223,6 +225,7 @@ public class Stage1_Manager : Entity {
                 else if (board[i, j, 1] == "left") {
                     if (board[i, j, 0].IndexOf("p") >= 0 && board[i, j - 1, 0].IndexOf("e") >= 0) {
                         e[int.Parse(board[i, j - 1, 0][1] + "") - 1].HP = ComputeHP(e[int.Parse(board[i, j - 1, 0][1] + "") - 1].HP, cardBoard[i, j, 0], cardBoard[i, j - 1, 1]);
+                        e[int.Parse(board[i, j - 1, 0][1] + "") - 1].isPass = true;
                     }
                     else if (board[i, j, 0].IndexOf("e") >= 0 && board[i, j - 1, 0].IndexOf("p") >= 0) {
                         p[int.Parse(board[i, j - 1, 0][1] + "") - 1].HP = ComputeHP(p[int.Parse(board[i, j - 1, 0][1] + "") - 1].HP, cardBoard[i, j, 0], cardBoard[i, j - 1, 1]);
@@ -234,6 +237,7 @@ public class Stage1_Manager : Entity {
                 else if (board[i, j, 1] == "right") {
                     if (board[i, j, 0].IndexOf("p") >= 0 && board[i, j + 1, 0].IndexOf("e") >= 0) {
                         e[int.Parse(board[i, j + 1, 0][1] + "") - 1].HP = ComputeHP(e[int.Parse(board[i, j + 1, 0][1] + "") - 1].HP, cardBoard[i, j, 0], cardBoard[i, j + 1, 1]);
+                        e[int.Parse(board[i, j + 1, 0][1] + "") - 1].isPass = true;
                     }
                     else if (board[i, j, 0].IndexOf("e") >= 0 && board[i, j + 1, 0].IndexOf("p") >= 0) {
                         p[int.Parse(board[i, j + 1, 0][1] + "") - 1].HP = ComputeHP(p[int.Parse(board[i, j + 1, 0][1] + "") - 1].HP, cardBoard[i, j, 0], cardBoard[i, j + 1, 1]);

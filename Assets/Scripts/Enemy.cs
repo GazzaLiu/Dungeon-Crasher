@@ -5,8 +5,9 @@ using System.Collections;
 public class Enemy : Entity {
 
     public bool isTurn = false;
-    public bool isAttacked = false;
     public bool isActing = true;
+    public bool isPass = false;
+
     public int e_tag = 0;
     public int HP = 0;
     public int range = 2;
@@ -17,6 +18,7 @@ public class Enemy : Entity {
 
     public GameObject manager;
     public Stage1_Manager m;
+    public Card aggr = new Card();
     public Card pass = new Card();
 
     public Card[] hand = new Card[3];
@@ -45,6 +47,7 @@ public class Enemy : Entity {
     void Start () {
         m = manager.GetComponent<Stage1_Manager>();
         sr = this.transform.GetChild(0).GetComponent<SpriteRenderer>();
+        aggr = new Card();
         pass = new Card();
         deck = new Deck(card_id);
         deck.Shuffle();
@@ -67,7 +70,6 @@ public class Enemy : Entity {
 
         //enemy's turn
         if (isActing && isTurn && m.enemyTurn % 4 == (e_tag * 2 - 2)) {
-            print("EEEE" + e_tag);
             StartCoroutine(Action());
             isActing = false;
         }
@@ -75,12 +77,17 @@ public class Enemy : Entity {
 
     private IEnumerator Action () {
 
+        yield return new WaitForSeconds(1.2f);
+
         //recycle passive card
         if (m.cardBoard[position[0], position[1], 1].ID != 0) {
             fold.Add(m.cardBoard[position[0], position[1], 1]);
             m.cardBoard[position[0], position[1], 1].Clear();
             pass.Clear();
         }
+        isPass = false;
+
+        yield return new WaitForSeconds(1.2f);
 
         //move + attack
         PlayerPosition();
@@ -88,100 +95,115 @@ public class Enemy : Entity {
         AssignAttackBlockPlayer2();
         OldPosition[0] = position[0];
         OldPosition[1] = position[1];
-        if (IfCanGoToPlayer(player1_up, Player1Position, position) && m.board[player1_up[0], player1_up[1], 0] == "n") {
+        if (IfCanGoToPlayer(player2_right, Player2Position, position) && m.board[player2_right[0], player2_right[1], 0] == "n" && m.liveList[1] != "p2_dead") {
+            m.board[position[0], position[1], 0] = "n";
+            position[0] = player2_right[0];
+            position[1] = player2_right[1];
+            m.board[position[0], position[1], 0] = "e" + e_tag.ToString();
+            yield return new WaitForSeconds(1.2f);
+            if (GetMaxCard(hand, "attack") != -1) {
+                m.board[position[0], position[1], 1] = ActDirection(position, Player2Position);
+                m.cardBoard[position[0], position[1], 0] = new Card(hand[GetMaxCard(hand, "attack")]);
+                aggr = new Card(hand[GetMaxCard(hand, "attack")]);
+                fold.Add(hand[GetMaxCard(hand, "attack")]);
+                hand[GetMaxCard(hand, "attack")].Clear();
+            }
+        }
+        else if (IfCanGoToPlayer(player1_up, Player1Position, position) && m.board[player1_up[0], player1_up[1], 0] == "n" && m.liveList[0] != "p1_dead") {
             m.board[position[0], position[1], 0] = "n";
             position[0] = player1_up[0];
             position[1] = player1_up[1];
             m.board[position[0], position[1], 0] = "e" + e_tag.ToString();
+            yield return new WaitForSeconds(1.2f);
             if (GetMaxCard(hand, "attack") != -1) {
                 m.board[position[0], position[1], 1] = ActDirection(position, Player1Position);
                 m.cardBoard[position[0], position[1], 0] = new Card(hand[GetMaxCard(hand, "attack")]);
+                aggr = new Card(hand[GetMaxCard(hand, "attack")]);
                 fold.Add(hand[GetMaxCard(hand, "attack")]);
                 hand[GetMaxCard(hand, "attack")].Clear();
             }
 
         }
-        else if (IfCanGoToPlayer(player1_down, Player1Position, position) && m.board[player1_down[0], player1_down[1], 0] == "n") {
+        else if (IfCanGoToPlayer(player1_down, Player1Position, position) && m.board[player1_down[0], player1_down[1], 0] == "n" && m.liveList[0] != "p1_dead") {
             m.board[position[0], position[1], 0] = "n";
             position[0] = player1_down[0];
             position[1] = player1_down[1];
             m.board[position[0], position[1], 0] = "e" + e_tag.ToString();
+            yield return new WaitForSeconds(1.2f);
             if (GetMaxCard(hand, "attack") != -1) {
                 m.board[position[0], position[1], 1] = ActDirection(position, Player1Position);
                 m.cardBoard[position[0], position[1], 0] = new Card(hand[GetMaxCard(hand, "attack")]);
+                aggr = new Card(hand[GetMaxCard(hand, "attack")]);
                 fold.Add(hand[GetMaxCard(hand, "attack")]);
                 hand[GetMaxCard(hand, "attack")].Clear();
             }
         }
-        else if (IfCanGoToPlayer(player1_left, Player1Position, position) && m.board[player1_left[0], player1_left[1], 0] == "n") {
+        else if (IfCanGoToPlayer(player1_left, Player1Position, position) && m.board[player1_left[0], player1_left[1], 0] == "n" && m.liveList[0] != "p1_dead") {
             m.board[position[0], position[1], 0] = "n";
             position[0] = player1_left[0];
             position[1] = player1_left[1];
             m.board[position[0], position[1], 0] = "e" + e_tag.ToString();
+            yield return new WaitForSeconds(1.2f);
             if (GetMaxCard(hand, "attack") != -1) {
                 m.board[position[0], position[1], 1] = ActDirection(position, Player1Position);
                 m.cardBoard[position[0], position[1], 0] = new Card(hand[GetMaxCard(hand, "attack")]);
+                aggr = new Card(hand[GetMaxCard(hand, "attack")]);
                 fold.Add(hand[GetMaxCard(hand, "attack")]);
                 hand[GetMaxCard(hand, "attack")].Clear();
             }
         }
-        else if (IfCanGoToPlayer(player1_right, Player1Position, position) && m.board[player1_right[0], player1_right[1], 0] == "n") {
-            m.board[position[0], position[1], 0] = "n";
-            position[0] = player1_right[0];
-            position[1] = player1_right[1];
-            m.board[position[0], position[1], 0] = "e" + e_tag.ToString();
-            if (GetMaxCard(hand, "attack") != -1) {
-                m.board[position[0], position[1], 1] = ActDirection(position, Player1Position);
-                m.cardBoard[position[0], position[1], 0] = new Card(hand[GetMaxCard(hand, "attack")]);
-                fold.Add(hand[GetMaxCard(hand, "attack")]);
-                hand[GetMaxCard(hand, "attack")].Clear();
-            }
-        }
-
-        else if (IfCanGoToPlayer(player2_up, Player2Position, position) && m.board[player2_up[0], player2_up[1], 0] == "n") {
-            m.board[position[0], position[1], 0] = "n";
-            position[0] = player2_up[0];
-            position[1] = player2_up[1];
-            m.board[position[0], position[1], 0] = "e" + e_tag.ToString();
-            if (GetMaxCard(hand, "attack") != -1) {
-                m.board[position[0], position[1], 1] = ActDirection(position, Player2Position);
-                m.cardBoard[position[0], position[1], 0] = new Card(hand[GetMaxCard(hand, "attack")]);
-                fold.Add(hand[GetMaxCard(hand, "attack")]);
-                hand[GetMaxCard(hand, "attack")].Clear();
-            }
-        }
-        else if (IfCanGoToPlayer(player2_down, Player2Position, position) && m.board[player2_down[0], player2_down[1], 0] == "n") {
+        else if (IfCanGoToPlayer(player2_down, Player2Position, position) && m.board[player2_down[0], player2_down[1], 0] == "n" && m.liveList[1] != "p2_dead") {
             m.board[position[0], position[1], 0] = "n";
             position[0] = player2_down[0];
             position[1] = player2_down[1];
             m.board[position[0], position[1], 0] = "e" + e_tag.ToString();
+            yield return new WaitForSeconds(1.2f);
             if (GetMaxCard(hand, "attack") != -1) {
                 m.board[position[0], position[1], 1] = ActDirection(position, Player2Position);
                 m.cardBoard[position[0], position[1], 0] = new Card(hand[GetMaxCard(hand, "attack")]);
+                aggr = new Card(hand[GetMaxCard(hand, "attack")]);
                 fold.Add(hand[GetMaxCard(hand, "attack")]);
                 hand[GetMaxCard(hand, "attack")].Clear();
             }
         }
-        else if (IfCanGoToPlayer(player2_left, Player2Position, position) && m.board[player2_left[0], player2_left[1], 0] == "n") {
-            m.board[position[0], position[1], 0] = "n";
-            position[0] = player2_left[0];
-            position[1] = player2_left[1];
-            m.board[position[0], position[1], 0] = "e" + e_tag.ToString();
-            if (GetMaxCard(hand, "attack") != -1) {
-                m.board[position[0], position[1], 1] = ActDirection(position, Player2Position);
-                m.cardBoard[position[0], position[1], 0] = new Card(hand[GetMaxCard(hand, "attack")]);
-                fold.Add(hand[GetMaxCard(hand, "attack")]);
-                hand[GetMaxCard(hand, "attack")].Clear();
-            }
-        }
-        else if (IfCanGoToPlayer(player2_right, Player2Position, position) && m.board[player2_right[0], player2_right[1], 0] == "n") {
+        else if (IfCanGoToPlayer(player1_right, Player1Position, position) && m.board[player1_right[0], player1_right[1], 0] == "n" && m.liveList[0] != "p1_dead") {
             m.board[position[0], position[1], 0] = "n";
             position[0] = player1_right[0];
             position[1] = player1_right[1];
             m.board[position[0], position[1], 0] = "e" + e_tag.ToString();
+            yield return new WaitForSeconds(1.2f);
+            if (GetMaxCard(hand, "attack") != -1) {
+                m.board[position[0], position[1], 1] = ActDirection(position, Player1Position);
+                m.cardBoard[position[0], position[1], 0] = new Card(hand[GetMaxCard(hand, "attack")]);
+                aggr = new Card(hand[GetMaxCard(hand, "attack")]);
+                fold.Add(hand[GetMaxCard(hand, "attack")]);
+                hand[GetMaxCard(hand, "attack")].Clear();
+            }
+        }
+        else if (IfCanGoToPlayer(player2_up, Player2Position, position) && m.board[player2_up[0], player2_up[1], 0] == "n" && m.liveList[1] != "p2_dead") {
+            m.board[position[0], position[1], 0] = "n";
+            position[0] = player2_up[0];
+            position[1] = player2_up[1];
+            m.board[position[0], position[1], 0] = "e" + e_tag.ToString();
+            yield return new WaitForSeconds(1.2f);
             if (GetMaxCard(hand, "attack") != -1) {
                 m.board[position[0], position[1], 1] = ActDirection(position, Player2Position);
                 m.cardBoard[position[0], position[1], 0] = new Card(hand[GetMaxCard(hand, "attack")]);
+                aggr = new Card(hand[GetMaxCard(hand, "attack")]);
+                fold.Add(hand[GetMaxCard(hand, "attack")]);
+                hand[GetMaxCard(hand, "attack")].Clear();
+            }
+        }
+        else if (IfCanGoToPlayer(player2_left, Player2Position, position) && m.board[player2_left[0], player2_left[1], 0] == "n" && m.liveList[1] != "p2_dead") {
+            m.board[position[0], position[1], 0] = "n";
+            position[0] = player2_left[0];
+            position[1] = player2_left[1];
+            m.board[position[0], position[1], 0] = "e" + e_tag.ToString();
+            yield return new WaitForSeconds(1.2f);
+            if (GetMaxCard(hand, "attack") != -1) {
+                m.board[position[0], position[1], 1] = ActDirection(position, Player2Position);
+                m.cardBoard[position[0], position[1], 0] = new Card(hand[GetMaxCard(hand, "attack")]);
+                aggr = new Card(hand[GetMaxCard(hand, "attack")]);
                 fold.Add(hand[GetMaxCard(hand, "attack")]);
                 hand[GetMaxCard(hand, "attack")].Clear();
             }
@@ -190,7 +212,7 @@ public class Enemy : Entity {
             do {
                 randRow = UnityEngine.Random.Range(0, 8); //隨機指定一列
                 randColumn = UnityEngine.Random.Range(0, 5); //隨機指定一欄 
-                print("I'll get you next round!!");
+                //print("I'll get you next round!!");
             } while ((m.board[randRow, randColumn, 0] != "n") || Mathf.Abs(position[0] - randRow) + Mathf.Abs(position[1] - randColumn) > range);
             m.board[position[0], position[1], 0] = "n"; //將原始位置改為n
             position[0] = randRow;
@@ -198,13 +220,18 @@ public class Enemy : Entity {
             m.board[position[0], position[1], 0] = "e" + e_tag.ToString(); //移動敵人
         }
         m.CheckAggr();
+        yield return new WaitForSeconds(1.2f);
+        aggr.Clear();
+        yield return new WaitForSeconds(1.2f);
 
         //defence
         if (GetMaxCard(hand, "defence") != -1) {
             m.cardBoard[position[0], position[1], 1] = new Card(hand[GetMaxCard(hand, "defence")]);
             pass = new Card(hand[GetMaxCard(hand, "defence")]);
-            hand[1].Clear();
+            hand[GetMaxCard(hand, "defence")].Clear();
         }
+
+        yield return new WaitForSeconds(1.2f);
 
         //draw
         for (int i = 0; i < 3; i++) {
@@ -222,7 +249,6 @@ public class Enemy : Entity {
         //yield return new WaitForSeconds(2.0f);
 
         //end turn
-        print(e_tag + "END");
         m.EndTurn("e" + e_tag.ToString());
 
         yield break;
@@ -245,8 +271,6 @@ public class Enemy : Entity {
                 }
             }
         }
-        print("Player1Row:" + Player1Position[0] + "  " + "Player1Column:" + Player1Position[1]);
-        print("Player2Row:" + Player2Position[0] + "  " + "Player2Column:" + Player2Position[1]);
     }
 
     private void AssignAttackBlockPlayer1 () {
@@ -258,12 +282,6 @@ public class Enemy : Entity {
         player1_down[0]++;
         player1_left[1]--;
         player1_right[1]++;
-        print("Player1Row:" + Player1Position[0] + "  " + "Player1Column:" + Player1Position[1]);
-        print("Player1's Attackblock:");
-        PrintthePosition(player1_up);
-        PrintthePosition(player1_down);
-        PrintthePosition(player1_left);
-        PrintthePosition(player1_right);
     }
 
     private void AssignAttackBlockPlayer2 () {
@@ -275,10 +293,6 @@ public class Enemy : Entity {
         player2_down[0]++;
         player2_left[1]--;
         player2_right[1]++;
-        print("Player2Row:" + Player2Position[0] + "  " + "Player2Column:" + Player2Position[1]);
-        print("Player2's Attackblock:");
-        print(player2_up[0] + " " + player2_up[1]);
-        print(player2_right[0] + " " + player2_right[1]);
     }
 
     private bool IfCanGoToPlayer (int[] PlayersAttackBlock, int[] PlayersPosition, int[] MonstersPosition) {  //如果玩家上下左右在棋盤裡,且在怪獸打擊範圍內

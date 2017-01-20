@@ -15,6 +15,7 @@ public class Stage1_Displayer : Entity {
     public GameObject[] hand = new GameObject[2];
     public GameObject[] pass = new GameObject[2];
     public GameObject[] HP = new GameObject[MAX_PLAYER + MAX_ENEMY];
+    public GameObject[] range = new GameObject[MAX_PLAYER];
     public Sprite[] cardSprite = new Sprite[11];
     public Sprite[] enemyCardSprite = new Sprite[3];
     public Sprite[] numberSprite = new Sprite[10];
@@ -144,6 +145,21 @@ public class Stage1_Displayer : Entity {
         else if (pointer == 1) {
             playerSelect.transform.position = new Vector3(8.251f, -1.28f, 0);
         }
+
+        //display player's walk range
+        for (int i = 0; i < p.Length; i++) {
+            if (p[i].isMoving && p[i].isActing) {
+                range[i].transform.position = p[i].transform.position;
+            }
+            else {
+                range[i].transform.position = new Vector3(50, 50, 0);
+            }
+        }
+
+        //HP animation
+        /*foreach (GameObject g in HP) {
+            g.transform.localPosition = new Vector3(0, 0.02f * Mathf.Sin(3 * Time.time), 0);
+        }*/
 
     }
 

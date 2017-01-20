@@ -5,6 +5,7 @@ public class Player : Entity {
 
     public bool isTurn = true;
     public bool isActing = false;
+    public bool isMoving = false;
     public int p_tag = 0;
     public int HP = 0;
     public int range = 2;
@@ -20,7 +21,7 @@ public class Player : Entity {
 
     private bool isAggr = true;
     private bool isPass = true;
-    private int step = 0;
+    public int step = 0;
 
     private int[] startPosition = new int[2];
     private int[] endPosition = new int[2];
@@ -65,6 +66,10 @@ public class Player : Entity {
 
             //cancel selection
             if (isActing == true && Input.GetKeyDown(KeyCode.X)) {
+                if (step == 2) {
+                    step = 1;
+                }
+                isMoving = false;
                 isActing = false;
             }
 
@@ -78,26 +83,26 @@ public class Player : Entity {
                 step++;
             }
 
-            //select player for moving
-            if (step == 1 && isActing == true && Input.GetKeyDown(KeyCode.Z) && m.board[m.position[0], m.position[1], 0] == ("p" + p_tag.ToString())) {
-
-                //prepare for moving
-                startPosition[0] = m.position[0];
-                startPosition[1] = m.position[1];
-
-                step++;
-            }
-
             //move player
-            if (step == 2 && isActing == true && Input.GetKeyDown(KeyCode.Z) && m.board[m.position[0], m.position[1], 0] == "n" && Mathf.Abs(m.position[0] - startPosition[0]) + Mathf.Abs(m.position[1] - startPosition[1]) <= range) {
+            if (step == 2 && isActing == true && Input.GetKeyDown(KeyCode.Z) && (m.board[m.position[0], m.position[1], 0] == "n" || m.board[m.position[0], m.position[1], 0] == "p" + p_tag.ToString()) && Mathf.Abs(m.position[0] - startPosition[0]) + Mathf.Abs(m.position[1] - startPosition[1]) <= range) {
                 endPosition[0] = m.position[0];
                 endPosition[1] = m.position[1];
                 m.board[startPosition[0], startPosition[1], 0] = "n";
                 m.board[endPosition[0], endPosition[1], 0] = "p" + p_tag.ToString();
                 position[0] = endPosition[0];
                 position[1] = endPosition[1];
+                isMoving = false;
                 isAggr = true;
                 isPass = true;
+                step++;
+            }
+
+            //select player for moving
+            if (step == 1 && isActing == true && Input.GetKeyDown(KeyCode.Z) && m.board[m.position[0], m.position[1], 0] == ("p" + p_tag.ToString())) {
+                //prepare for moving
+                startPosition[0] = m.position[0];
+                startPosition[1] = m.position[1];
+                isMoving = true;
                 step++;
             }
 
@@ -206,7 +211,6 @@ public class Player : Entity {
         deck = new Deck(fold);
         deck.Shuffle();
         fold.Clear();
-        print("oo");
     }
 
 }

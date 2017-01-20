@@ -88,6 +88,9 @@ public class Stage1_Manager : Entity {
                 player.isActing = true;
             }
             else {
+                if (player.step == 2) {
+                    player.step = 1;
+                }
                 player.isActing = false;
             }
         }
@@ -113,17 +116,31 @@ public class Stage1_Manager : Entity {
     }
 
     public void EndTurn (string name) {
+        string temp = "";
         if (name.IndexOf("p") >= 0) {
             playerTurn = false;
-            foreach (string str in liveList) {
-                if (str.IndexOf("e") >= 0 && str.IndexOf("dead") >= 0) {
+            foreach (Enemy enemy in e) {
+                enemy.isActing = true;
+            }
+            /*for (int i = 0; i < liveList.Length; i++) {
+                if (liveList[i].IndexOf("e") >= 0 && liveList[i].IndexOf("dead") >= 0 && liveList[i - 1].IndexOf("p") >= 0) {
                     enemyTurn++;
                 }
-            }
+            }*/
         }
         else {
-            if (name == liveList[liveList.Length - 1]) {
+            foreach (string str in liveList) {
+                if (str.IndexOf("e") >= 0 && str.IndexOf("dead") < 0) {
+                    temp = str;
+                }
+            }
+            if (name == temp) {
                 playerTurn = true;
+            }
+            for (int i = 0; i < liveList.Length; i++) {
+                if (liveList[i].IndexOf("e1_dead") >= 0 || liveList[i].IndexOf("e2_dead") >= 0) {
+                    enemyTurn += 2;
+                }
             }
             enemyTurn += 2;
         }
@@ -131,6 +148,9 @@ public class Stage1_Manager : Entity {
 
     public void DeathEvent (int[] position, string name) {
         int count = 0;
+        if (name.IndexOf("e") >= 0 && name != liveList[liveList.Length - 1]) {
+            enemyTurn += 2;
+        }
         for (int i = 0; i < liveList.Length; i++) {
             if (name == liveList[i]) {
                 liveList[i] = name + "_dead";

@@ -1,26 +1,27 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Player : Entity {
+public class Player : Character {
 
-    public bool isTurn = true;
-    public bool isActing = false;
+    //public bool isTurn = true;
+    //public bool isActing = false;
     public bool isMoving = false;
-    public int p_tag = 0;
-    public int HP = 0;
-    public int range = 2;
+    //public int HP = 0;
+    //public int range = 2;
+    //public int stamina = 5;
+    //public int stamina_max = 5;
+    //public int recovery = 2;
+    //public string label;
 
-    public int[] position = new int[2] { 0, 0 };
-    public int[] card_id = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    //public int[] position = new int[2] { 0, 0 };
+    //public int[] card_id = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     public GameObject manager;
-    public Stage1_Manager m;
-    public Card pass = new Card();
+    private Stage1_Manager m;
+    //public Card pass = new Card();
 
-    public Card[] hand = new Card[3];
+    //public Card[] hand = new Card[3];
 
-    private bool isAggr = true;
-    private bool isPass = true;
     public int step = 0;
 
     private int[] startPosition = new int[2];
@@ -29,10 +30,11 @@ public class Player : Entity {
     private AnimationController ac;
     private SpriteRenderer sr;
 
-    private Deck deck = new Deck();
-    private Deck fold = new Deck();
+    //public Deck deck = new Deck();
+    //public Deck fold = new Deck();
 
     void Start () {
+        label = type + order;
         m = manager.GetComponent<Stage1_Manager>();
         ac = this.transform.GetChild(0).GetComponent<AnimationController>();
         sr = this.transform.GetChild(0).GetComponent<SpriteRenderer>();
@@ -52,20 +54,26 @@ public class Player : Entity {
 
         //death event
         if (HP <= 0) {
-            m.DeathEvent(position, "p" + p_tag.ToString());
-            Destroy(this.gameObject);
+            m.DeathEvent(this);
+            //m.DeathEvent(position, label);
+            //Destroy(this.gameObject);
         }
 
         //player's turn
         if (isTurn) {
 
+            //check status
+            if (status == "dead") {
+                isActing = false;
+            }
+
             //select player
-            if (isActing == false && Input.GetKeyDown(KeyCode.Z) && m.board[m.position[0], m.position[1], 0] == ("p" + p_tag.ToString())) {
-                m.ActivatePlayer("p" + p_tag.ToString());
+            if (status != "dead" && !isActing && Input.GetKeyDown(KeyCode.Z) && m.board.GetCharacterLabel(m.position[0], m.position[1]) == label) {
+                m.activatePlayer(label);
             }
 
             //cancel selection
-            if (isActing == true && Input.GetKeyDown(KeyCode.X)) {
+            if (isActing && Input.GetKeyDown(KeyCode.X)) {
                 if (step == 2) {
                     step = 1;
                 }
@@ -73,32 +81,38 @@ public class Player : Entity {
                 isActing = false;
             }
 
-            //recycle passive card
+            //recycle passive card and recover stamina
             if (step == 0) {
-                if (m.cardBoard[position[0], position[1], 1].ID != 0) {
-                    fold.Add(m.cardBoard[position[0], position[1], 1]);
-                    m.cardBoard[position[0], position[1], 1].Clear();
+                if (pass.ID != 0) {
+                    fold.Add(pass);
                     pass.Clear();
                 }
+                stamina += recovery;
+                stamina = Mathf.Clamp(stamina, 0, stamina_max);
                 step++;
             }
 
             //move player
-            if (step == 2 && isActing == true && Input.GetKeyDown(KeyCode.Z) && (m.board[m.position[0], m.position[1], 0] == "n" || m.board[m.position[0], m.position[1], 0] == "p" + p_tag.ToString()) && Mathf.Abs(m.position[0] - startPosition[0]) + Mathf.Abs(m.position[1] - startPosition[1]) <= range) {
+            if (step == 2 && isActing == true && Input.GetKeyDown(KeyCode.Z) && (m.board.GetCharacterLabel(m.position[0], m.position[1]) == "n" || m.board.GetCharacterLabel(m.position[0], m.position[1]) == label) && Mathf.Abs(m.position[0] - startPosition[0]) + Mathf.Abs(m.position[1] - startPosition[1]) <= range) {
                 endPosition[0] = m.position[0];
                 endPosition[1] = m.position[1];
-                m.board[startPosition[0], startPosition[1], 0] = "n";
-                m.board[endPosition[0], endPosition[1], 0] = "p" + p_tag.ToString();
+                m.board.SetCharacterLabel(startPosition[0], startPosition[1], "n");
+                m.board.SetCharacterLabel(endPosition[0], endPosition[1], label);
                 position[0] = endPosition[0];
                 position[1] = endPosition[1];
                 isMoving = false;
-                isAggr = true;
-                isPass = true;
                 step++;
             }
 
             //select player for moving
-            if (step == 1 && isActing == true && Input.GetKeyDown(KeyCode.Z) && m.board[m.position[0], m.position[1], 0] == ("p" + p_tag.ToString())) {
+            /*if (step == 1 && isActing == true && Input.GetKeyDown(KeyCode.Z) && m.board[m.position[0], m.position[1], 0] == (label)) {
+                //prepare for moving
+                startPosition[0] = m.position[0];
+                startPosition[1] = m.position[1];
+                isMoving = true;
+                step++;
+            }*/
+            if (step == 1 && isActing == true && Input.GetKeyDown(KeyCode.Z) && m.board.GetCharacterLabel(m.position[0], m.position[1]) == (label)) {
                 //prepare for moving
                 startPosition[0] = m.position[0];
                 startPosition[1] = m.position[1];
@@ -108,60 +122,90 @@ public class Player : Entity {
 
             //play card
             if (step == 3 && isActing == true && Input.GetKeyDown(KeyCode.Alpha1) && hand[0].ID != 0) {
-                if (hand[0].Action == "attack" && isAggr && ActDirection(position, m.position) != "n") {
-                    m.board[position[0], position[1], 1] = ActDirection(position, m.position);
-                    m.cardBoard[position[0], position[1], 0] = new Card(hand[0]);
+                if (m.PlayCard(position[0], position[1], m.position[0], m.position[1], hand[0])) {
+                    //ac.Attack();
                     fold.Add(hand[0]);
                     hand[0].Clear();
+                }
+                /*if (hand[0].Action == "attack" && hand[0].Cost <= stamina && ActDirection(position, m.position) != "n") {
+                    //m.board[position[0], position[1], 1] = ActDirection(position, m.position);
+                    //m.cardBoard[position[0], position[1], 0] = new Card(hand[0]);
+                    stamina -= hand[0].Cost;
+                    hand[0].SetTarget(m.GetTarget(position[0], position[1], 1, ActDirection(position, m.position)));
+                    m.board.SetAggr(position[0], position[1], hand[0]);
                     m.CheckAggr();
                     ac.Attack();
-                    isAggr = false;
+                    fold.Add(hand[0]);
+                    hand[0].Clear();
                 }
-                else if (hand[0].Action == "defence" && isPass) {
-                    m.cardBoard[position[0], position[1], 1] = new Card(hand[0]);
+                else if (hand[0].Action == "defence" && hand[0].Cost <= stamina) {
+                    //m.cardBoard[position[0], position[1], 1] = new Card(hand[0]);
+                    //m.board.SetPass(position[0], position[1], hand[0]);
+                    stamina -= hand[0].Cost;
                     pass = new Card(hand[0]);
                     hand[0].Clear();
-                    isPass = false;
+                }*/
+            }
+
+            if (step == 3 && isActing == true && Input.GetKeyDown(KeyCode.Alpha2) && hand[1].ID != 0) {
+                if (m.PlayCard(position[0], position[1], m.position[0], m.position[1], hand[1])) {
+                    //ac.Attack();
+                    fold.Add(hand[1]);
+                    hand[1].Clear();
+                }
+            }
+
+            if (step == 3 && isActing == true && Input.GetKeyDown(KeyCode.Alpha3) && hand[2].ID != 0) {
+                if (m.PlayCard(position[0], position[1], m.position[0], m.position[1], hand[2])) {
+                    //ac.Attack();
+                    fold.Add(hand[2]);
+                    hand[2].Clear();
                 }
             }
 
             //play card
-            if (step == 3 && isActing == true && Input.GetKeyDown(KeyCode.Alpha2) && hand[1].ID != 0) {
-                if (hand[1].Action == "attack" && isAggr && ActDirection(position, m.position) != "n") {
-                    m.board[position[0], position[1], 1] = ActDirection(position, m.position);
-                    m.cardBoard[position[0], position[1], 0] = new Card(hand[1]);
-                    fold.Add(hand[1]);
-                    hand[1].Clear();
+            /*if (step == 3 && isActing == true && Input.GetKeyDown(KeyCode.Alpha2) && hand[1].ID != 0) {
+                if (hand[1].Action == "attack" && hand[1].Cost <= stamina && ActDirection(position, m.position) != "n") {
+                    //m.board[position[0], position[1], 1] = ActDirection(position, m.position);
+                    //m.cardBoard[position[0], position[1], 0] = new Card(hand[1]);
+                    stamina -= hand[1].Cost;
+                    hand[1].SetTarget(m.GetTarget(position[0], position[1], 1, ActDirection(position, m.position)));
+                    m.board.SetAggr(position[0], position[1], hand[1]);
                     m.CheckAggr();
                     ac.Attack();
-                    isAggr = false;
+                    fold.Add(hand[1]);
+                    hand[1].Clear();
                 }
-                else if (hand[1].Action == "defence" && isPass) {
-                    m.cardBoard[position[0], position[1], 1] = new Card(hand[1]);
+                else if (hand[1].Action == "defence" && hand[1].Cost <= stamina) {
+                    //m.cardBoard[position[0], position[1], 1] = new Card(hand[1]);
+                    //m.board.SetPass(position[0], position[1], hand[1]);
+                    stamina -= hand[1].Cost;
                     pass = new Card(hand[1]);
                     hand[1].Clear();
-                    isPass = false;
                 }
             }
 
             //play card
             if (step == 3 && isActing == true && Input.GetKeyDown(KeyCode.Alpha3) && hand[2].ID != 0) {
-                if (hand[2].Action == "attack" && isAggr && ActDirection(position, m.position) != "n") {
-                    m.board[position[0], position[1], 1] = ActDirection(position, m.position);
-                    m.cardBoard[position[0], position[1], 0] = new Card(hand[2]);
-                    fold.Add(hand[2]);
-                    hand[2].Clear();
+                if (hand[2].Action == "attack" && hand[2].Cost <= stamina && ActDirection(position, m.position) != "n") {
+                    //m.board[position[0], position[1], 1] = ActDirection(position, m.position);
+                    //m.cardBoard[position[0], position[1], 0] = new Card(hand[2]);
+                    stamina -= hand[2].Cost;
+                    hand[2].SetTarget(m.GetTarget(position[0], position[1], 1, ActDirection(position, m.position)));
+                    m.board.SetAggr(position[0], position[1], hand[2]);
                     m.CheckAggr();
                     ac.Attack();
-                    isAggr = false;
+                    fold.Add(hand[2]);
+                    hand[2].Clear();
                 }
-                else if (hand[2].Action == "defence" && isPass) {
-                    m.cardBoard[position[0], position[1], 1] = new Card(hand[2]);
+                else if (hand[2].Action == "defence" && hand[2].Cost <= stamina) {
+                    //m.cardBoard[position[0], position[1], 1] = new Card(hand[2]);
+                    //m.board.SetPass(position[0], position[1], hand[2]);
+                    stamina -= hand[2].Cost;
                     pass = new Card(hand[2]);
                     hand[2].Clear();
-                    isPass = false;
                 }
-            }
+            }*/
 
             //hand, deck and fold info
             if (Input.GetKeyDown(KeyCode.I)) {
@@ -169,13 +213,17 @@ public class Player : Entity {
                 print("hand2 is " + hand[1].ID);
                 print("hand3 is " + hand[2].ID);
                 print("your deck is");
-                deck.Show();
+                for (int i = 0; i < deck.Length(); i++) {
+                    print("(" + deck.Card(i).Action + "," + deck.Card(i).Type + "," + deck.Card(i).Value.ToString() + ")");
+                }
                 print("your fold is");
-                fold.Show();
+                for (int i = 0; i < fold.Length(); i++) {
+                    print("(" + fold.Card(i).Action + "," + fold.Card(i).Type + "," + fold.Card(i).Value.ToString() + ")");
+                }
             }
 
-            //end turn
-            if (Input.GetKeyDown(KeyCode.C)) {
+            //end turn in class Player
+            /*if (Input.GetKeyDown(KeyCode.C)) {
                 isActing = false;
                 step = 0;
                 for (int i = 0; i < 3; i++) {
@@ -187,30 +235,13 @@ public class Player : Entity {
                         }
                     }
                 }
-                m.EndTurn("p" + p_tag.ToString());
-            }
+                m.EndTurn(type);
+            }*/
 
         }
 
     }
 
-    static string ActDirection (int[] position, int[] selectPosition) {
-        if (selectPosition[0] - position[0] == -1 && selectPosition[1] - position[1] == 0)
-            return "up";
-        else if (selectPosition[0] - position[0] == 1 && selectPosition[1] - position[1] == 0)
-            return "down";
-        else if (selectPosition[0] - position[0] == 0 && selectPosition[1] - position[1] == 1)
-            return "right";
-        else if (selectPosition[0] - position[0] == 0 && selectPosition[1] - position[1] == -1)
-            return "left";
-        else
-            return "n";
-    }
 
-    private void ResetDeck () {
-        deck = new Deck(fold);
-        deck.Shuffle();
-        fold.Clear();
-    }
 
 }

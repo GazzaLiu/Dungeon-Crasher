@@ -2,28 +2,30 @@
 using System;
 using System.Collections;
 
-public class Enemy : Entity {
+public class Enemy : Character {
 
-    public bool isTurn = false;
-    public bool isActing = true;
+    //public bool isTurn = false;
+    public bool test;
+    //public bool isActing = true;
     public bool isPass = false;
 
-    public int e_tag = 0;
-    public int HP = 0;
-    public int range = 2;
+    //public int e_tag = 0;
+    //public int HP = 0;
+    //public int range = 2;
+    //public string label;
 
-    public int[] position = new int[2] { 0, 0 };
-    public int[] OldPosition = new int[2] { 0, 0 };
-    public int[] card_id = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    //public int[] position = new int[2] { 0, 0 };
+    //public int[] OldPosition = new int[2] { 0, 0 };
+    //public int[] card_id = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     public GameObject manager;
-    public Stage1_Manager m;
+    private Stage1_Manager m;
     public Card aggr = new Card();
-    public Card pass = new Card();
+    //public Card pass = new Card();
 
-    public Card[] hand = new Card[3];
+    //public Card[] hand = new Card[3];
 
-    private int randRow = 0;
+    /*private int randRow = 0;
     private int randColumn = 0;
 
     private int[] player1_up = new int[2];
@@ -34,17 +36,18 @@ public class Enemy : Entity {
     private int[] player2_up = new int[2];
     private int[] player2_down = new int[2];
     private int[] player2_left = new int[2];
-    private int[] player2_right = new int[2];
+    private int[] player2_right = new int[2];*/
 
     private SpriteRenderer sr;
 
-    private Deck deck = new Deck();
-    private Deck fold = new Deck();
+    //public Deck deck = new Deck();
+    //public Deck fold = new Deck();
 
-    private int[] Player1Position = new int[2] { 0, 0 };
-    private int[] Player2Position = new int[2] { 0, 0 };
+    //private int[] Player1Position = new int[2] { 0, 0 };
+    //private int[] Player2Position = new int[2] { 0, 0 };
 
     void Start () {
+        label = type + order;
         m = manager.GetComponent<Stage1_Manager>();
         sr = this.transform.GetChild(0).GetComponent<SpriteRenderer>();
         aggr = new Card();
@@ -64,38 +67,65 @@ public class Enemy : Entity {
 
         //death event
         if (HP <= 0) {
-            m.DeathEvent(position, "e" + e_tag.ToString());
-            Destroy(this.gameObject);
+            m.DeathEvent(this);
+            //m.DeathEvent(position, "e" + e_tag.ToString());
+            //Destroy(this.gameObject);
         }
 
         //enemy's turn
-        if (isActing && isTurn && m.enemyTurn % 4 == (e_tag * 2 - 2)) {
-            StartCoroutine(Action());
-            isActing = false;
+        if (isTurn) {
+            if (status == "dead") {
+                isActing = false;
+                //print(label + "dead");
+                m.enemyController(label, "end");
+            }
+            if (isActing) {
+                StartCoroutine(Action());
+                isActing = false;
+            }
+            //if (isActing && isTurn && m.enemyTurn % 4 == (e_tag * 2 - 2)) {
+
         }
     }
 
     private IEnumerator Action () {
 
-        yield return new WaitForSeconds(1.2f);
+        //yield return new WaitForSeconds(1.2f);
 
         //recycle passive card
-        if (m.cardBoard[position[0], position[1], 1].ID != 0) {
+        /*if (m.cardBoard[position[0], position[1], 1].ID != 0) {
             fold.Add(m.cardBoard[position[0], position[1], 1]);
             m.cardBoard[position[0], position[1], 1].Clear();
             pass.Clear();
         }
+        isPass = false;*/
+
+        //recycle passive card and recover stamina
+        if (pass.ID != 0) {
+            fold.Add(pass);
+            pass.Clear();
+        }
+        stamina += recovery;
+        stamina = Mathf.Clamp(stamina, 0, stamina_max);
         isPass = false;
 
-        yield return new WaitForSeconds(1.2f);
+        if (test) {
+            m.board.SetCharacterLabel(0, 1, "n");
+            position[0] = 6;
+            position[1] = 1;
+            m.board.SetCharacterLabel(position[0], position[1], label);
+            m.PlayCard(position[0], position[1], 7, 1, new Card(113));
+        }
+
+        //yield return new WaitForSeconds(1.2f);
 
         //move + attack
-        PlayerPosition();
-        AssignAttackBlockPlayer1();
-        AssignAttackBlockPlayer2();
-        OldPosition[0] = position[0];
-        OldPosition[1] = position[1];
-        if (IfCanGoToPlayer(player2_right, Player2Position, position) && m.board[player2_right[0], player2_right[1], 0] == "n" && m.liveList[1] != "p2_dead") {
+        //PlayerPosition();
+        //AssignAttackBlockPlayer1();
+        //AssignAttackBlockPlayer2();
+        //OldPosition[0] = position[0];
+        //OldPosition[1] = position[1];
+        /*if (IfCanGoToPlayer(player2_right, Player2Position, position) && m.board[player2_right[0], player2_right[1], 0] == "n" && m.liveList[1] != "p2_dead") {
             m.board[position[0], position[1], 0] = "n";
             position[0] = player2_right[0];
             position[1] = player2_right[1];
@@ -218,20 +248,21 @@ public class Enemy : Entity {
             position[0] = randRow;
             position[1] = randColumn;
             m.board[position[0], position[1], 0] = "e" + e_tag.ToString(); //移動敵人
-        }
-        m.CheckAggr();
-        yield return new WaitForSeconds(1.2f);
+        }*/
+        //m.CheckAggr();
+        //yield return new WaitForSeconds(1.2f);
         aggr.Clear();
-        yield return new WaitForSeconds(1.2f);
+        //yield return new WaitForSeconds(1.2f);
 
         //defence
-        if (GetMaxCard(hand, "defence") != -1) {
-            m.cardBoard[position[0], position[1], 1] = new Card(hand[GetMaxCard(hand, "defence")]);
+        /*if (GetMaxCard(hand, "defence") != -1) {
+            //m.cardBoard[position[0], position[1], 1] = new Card(hand[GetMaxCard(hand, "defence")]);
+            //m.board.SetPass(position[0], position[1], hand[GetMaxCard(hand, "defence")]);
             pass = new Card(hand[GetMaxCard(hand, "defence")]);
             hand[GetMaxCard(hand, "defence")].Clear();
-        }
+        }*/
 
-        yield return new WaitForSeconds(1.2f);
+        //yield return new WaitForSeconds(1.2f);
 
         //draw
         for (int i = 0; i < 3; i++) {
@@ -249,13 +280,16 @@ public class Enemy : Entity {
         //yield return new WaitForSeconds(2.0f);
 
         //end turn
-        m.EndTurn("e" + e_tag.ToString());
+        print(label + "done");
+        //m.enemyDone(label);
+        m.enemyController(label, "end");
+        //m.EndTurn(type);
 
         yield break;
     }
 
-    private void PlayerPosition () {
-        for (int i = 0; i < 8; i++) {
+    /*private void PlayerPosition () {*/
+        /*for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 5; j++) {
                 if (m.board[i, j, 0] == "p1") {
                     Player1Position[0] = i;
@@ -270,10 +304,26 @@ public class Enemy : Entity {
                     Player2Position[1] = p;
                 }
             }
+        }*/
+        /*for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 5; j++) {
+                if (m.board.GetCharacterLabel(i, j) == "p1") {
+                    Player1Position[0] = i;
+                    Player1Position[1] = j;
+                }
+            }
         }
-    }
-
-    private void AssignAttackBlockPlayer1 () {
+        for (int o = 0; o < 8; o++) {
+            for (int p = 0; p < 5; p++) {
+                if (m.board.GetCharacterLabel(o, p) == "p2") {
+                    Player2Position[0] = o;
+                    Player2Position[1] = p;
+                }
+            }
+        }
+    }*/
+    
+    /*private void AssignAttackBlockPlayer1 () {
         Array.Copy(Player1Position, player1_up, 2);
         Array.Copy(Player1Position, player1_down, 2);
         Array.Copy(Player1Position, player1_left, 2);
@@ -293,14 +343,14 @@ public class Enemy : Entity {
         player2_down[0]++;
         player2_left[1]--;
         player2_right[1]++;
-    }
+    }*/
 
     private bool IfCanGoToPlayer (int[] PlayersAttackBlock, int[] PlayersPosition, int[] MonstersPosition) {  //如果玩家上下左右在棋盤裡,且在怪獸打擊範圍內
         if (PlayersAttackBlock[0] <= 7 && PlayersAttackBlock[0] >= 0 && Mathf.Abs(PlayersAttackBlock[0] - MonstersPosition[0]) + Mathf.Abs(PlayersAttackBlock[1] - MonstersPosition[1]) <= range && PlayersAttackBlock[1] >= 0 && PlayersAttackBlock[1] <= 4) { return true; }
         else { return false; }
     }
 
-    static string ActDirection (int[] monstersposition, int[] playersposition) {
+    /*static string ActDirection (int[] monstersposition, int[] playersposition) {
         if (playersposition[0] - monstersposition[0] == -1 && playersposition[1] - monstersposition[1] == 0)
             return "up";
         else if (playersposition[0] - monstersposition[0] == 1 && playersposition[1] - monstersposition[1] == 0)
@@ -311,7 +361,7 @@ public class Enemy : Entity {
             return "left";
         else
             return "n";
-    }
+    }*/
 
     private void PrintthePosition (int[] passedposition) {
         foreach (int i in passedposition) {
@@ -345,10 +395,10 @@ public class Enemy : Entity {
         return -1;
     }
 
-    private void ResetDeck () {
+    /*private void ResetDeck () {
         deck = new Deck(fold);
         deck.Shuffle();
         fold.Clear();
-    }
+    }*/
 
 }

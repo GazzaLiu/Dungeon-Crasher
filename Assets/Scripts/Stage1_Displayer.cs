@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class Stage1_Displayer : Entity {
 
@@ -10,6 +11,7 @@ public class Stage1_Displayer : Entity {
     public GameObject manager;
     public GameObject select;
     public GameObject playerSelect;
+    public Text cardData;
 
     public GameObject[] character = new GameObject[MAX_PLAYER + MAX_ENEMY];
     public GameObject[] hand = new GameObject[2];
@@ -169,6 +171,64 @@ public class Stage1_Displayer : Entity {
             else {
                 range[i].transform.position = new Vector3(50, 50, 0);
             }
+        }
+
+        if (Input.GetKeyDown(KeyCode.F6)) {
+            //player1's data
+            cardData.text += "Player1\n" + "hand:";
+            for (int i = 0; i < p[0].hand.Length; i++) {
+                cardData.text += "(" + p[0].hand[i].Action + "," + p[0].hand[i].Type + "," + p[0].hand[i].Value.ToString() + ")";
+            }
+            cardData.text += "\ndeck:";
+            for (int i = 0; i < p[0].deck.Length(); i++) {
+                cardData.text += "(" + p[0].deck.Card(i).Action + "," + p[0].deck.Card(i).Type + "," + p[0].deck.Card(i).Value.ToString() + ")";
+            }
+            cardData.text += "\nfold:";
+            for (int i = 0; i < p[0].fold.Length(); i++) {
+                cardData.text += "(" + p[0].fold.Card(i).Action + "," + p[0].fold.Card(i).Type + "," + p[0].fold.Card(i).Value.ToString() + ")";
+            }
+            //player2's data
+            cardData.text += "\nPlayer2\n" + "hand:";
+            for (int i = 0; i < p[1].hand.Length; i++) {
+                cardData.text += "(" + p[1].hand[i].Action + "," + p[1].hand[i].Type + "," + p[1].hand[i].Value.ToString() + ")";
+            }
+            cardData.text += "\ndeck:";
+            for (int i = 0; i < p[1].deck.Length(); i++) {
+                cardData.text += "(" + p[1].deck.Card(i).Action + "," + p[1].deck.Card(i).Type + "," + p[1].deck.Card(i).Value.ToString() + ")";
+            }
+            cardData.text += "\nfold:";
+            for (int i = 0; i < p[1].fold.Length(); i++) {
+                cardData.text += "(" + p[1].fold.Card(i).Action + "," + p[1].fold.Card(i).Type + "," + p[1].fold.Card(i).Value.ToString() + ")";
+            }
+            //enemy1's data
+            cardData.text += "\nEnemy1\n" + "hand:";
+            for (int i = 0; i < e[0].hand.Length; i++) {
+                cardData.text += "(" + e[0].hand[i].Action + "," + e[0].hand[i].Type + "," + e[0].hand[i].Value.ToString() + ")";
+            }
+            cardData.text += "\ndeck:";
+            for (int i = 0; i < e[0].deck.Length(); i++) {
+                cardData.text += "(" + e[0].deck.Card(i).Action + "," + e[0].deck.Card(i).Type + "," + e[0].deck.Card(i).Value.ToString() + ")";
+            }
+            cardData.text += "\nfold:";
+            for (int i = 0; i < e[0].fold.Length(); i++) {
+                cardData.text += "(" + e[0].fold.Card(i).Action + "," + e[0].fold.Card(i).Type + "," + e[0].fold.Card(i).Value.ToString() + ")";
+            }
+            //enemy2's data
+            cardData.text += "\nEnemy2\n" + "hand:";
+            for (int i = 0; i < e[1].hand.Length; i++) {
+                cardData.text += "(" + e[1].hand[i].Action + "," + e[1].hand[i].Type + "," + e[1].hand[i].Value.ToString() + ")";
+            }
+            cardData.text += "\ndeck:";
+            for (int i = 0; i < e[1].deck.Length(); i++) {
+                cardData.text += "(" + e[1].deck.Card(i).Action + "," + e[1].deck.Card(i).Type + "," + e[1].deck.Card(i).Value.ToString() + ")";
+            }
+            cardData.text += "\nfold:";
+            for (int i = 0; i < e[1].fold.Length(); i++) {
+                cardData.text += "(" + e[1].fold.Card(i).Action + "," + e[1].fold.Card(i).Type + "," + e[1].fold.Card(i).Value.ToString() + ")";
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.F7)) {
+            cardData.text = "";
         }
 
     }

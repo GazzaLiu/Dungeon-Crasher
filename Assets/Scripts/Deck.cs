@@ -2,20 +2,25 @@
 using System;
 using System.Collections;
 
-public class Deck : Entity {
+public class Deck {
 
-    const int DEFAULT_NUMBER = 10;
+    //variable
+    private const int DEFAULT_NUMBER = 10;
 
-    private int nCard = 10;
+    private int nCard = DEFAULT_NUMBER;
+
     private Card tempCard;
+
     private Card[] deck = new Card[DEFAULT_NUMBER];
 
+    //default constructor
     public Deck () {
-        for (int i = 0; i < DEFAULT_NUMBER; i++) {
+        for (int i = 0; i < nCard; i++) {
             deck[i] = new Card();
         }
     }
 
+    //regular constructor
     public Deck (int[] card_id) {
         nCard = card_id.Length;
         deck = new Card[nCard];
@@ -24,31 +29,27 @@ public class Deck : Entity {
         }
     }
 
+    //copy constructor
     public Deck (Deck deck) {
         nCard = deck.nCard;
         tempCard = deck.tempCard;
         for(int i = 0; i < deck.Length(); i++) {
-            this.deck[i] = new Card(deck.Element(i));
+            this.deck[i] = new Card(deck.Card(i));
         }
     }
 
+    //member function
     public int Length () {
         return nCard;
     }
 
-    public Card Element (int index) {
+    public Card Card (int index) {
         return deck[index];
     }
 
     public void Clear () {
         foreach (Card card in deck) {
             card.Clear();
-        }
-    }
-
-    public void Show () {
-        foreach (Card card in deck) {
-            print("(" + card.Action + "," + card.Type + "," + card.Value.ToString() + ")");
         }
     }
 

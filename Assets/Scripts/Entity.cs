@@ -3,7 +3,22 @@ using System.Collections;
 
 public class Entity : MonoBehaviour {
 
-    protected void DisplayBoard (string[,,] board, int floor) {
+    protected void displaySelectPosition (int[] position) {
+        print("(" + position[0].ToString() + "," + position[1].ToString() + ")");
+    }
+
+    protected void displayBoard (Board board) {
+        string display = "";
+        for (int i = 0; i <= board.Row - 1; i++) {
+            for (int j = 0; j <= board.Column - 1; j++) {
+                display += board.GetTile(i, j).Character + "\t";
+            }
+            display += "\n";
+        }
+        print(display);
+    }
+
+    /*protected void DisplayBoard (string[,,] board, int floor) {
         string display = "";
         for (int i = 0; i <= board.GetUpperBound(0); i++) {
             for (int j = 0; j <= board.GetUpperBound(1); j++) {
@@ -12,9 +27,9 @@ public class Entity : MonoBehaviour {
             display += "\n";
         }
         print(display);
-    }
+    }*/
 
-    protected void DisplayCardBoard (Card[,,] board, int floor) {
+    /*protected void DisplayCardBoard (Card[,,] board, int floor) {
         string display = "";
         for (int i = 0; i <= board.GetUpperBound(0); i++) {
             for (int j = 0; j <= board.GetUpperBound(1); j++) {
@@ -23,7 +38,7 @@ public class Entity : MonoBehaviour {
             display += "\n";
         }
         print(display);
-    }
+    }*/
 
     protected float Horizontalposition (int i) {
         float x = -58f / 30f + (2f * i) * (203f / 420f);
